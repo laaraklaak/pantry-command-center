@@ -12,7 +12,7 @@
    DESIGN TOKENS — DARK ZEN COMMAND CENTRE
 ══════════════════════════════════════════════════════════════════ */
 :root {
-  /* Base Palette - Deep slate to reduce eye strain */
+  /* Palette - Deep, soft forest-slate to reduce eye strain */
   --bg:          #111413; 
   --bg-2:        #181c1a;
   
@@ -33,6 +33,7 @@
   --grove:       #66a87b; /* Muted bamboo green */
   --grove-lt:    #223a2a;
   --grove-dk:    #4d8a5f;
+  --grove-glow:  rgba(102, 168, 123, 0.12);
   
   --amber:       #dcb85c; /* Soft warning yellow */
   --amber-lt:    #3a2e15;
@@ -43,7 +44,7 @@
   --sky:         #6ba4c7; /* Soft informational blue */
   --sky-lt:      #172b38;
 
-  /* Finance colors */
+  /* Finance colors - Synchronized with the accents */
   --fin-income:  var(--grove);
   --fin-spend:   var(--rose);
   --fin-bill:    var(--sky);
@@ -202,7 +203,6 @@ a { color: inherit; text-decoration: none; }
 .btn-icon { width: 30px; height: 30px; padding: 0; justify-content: center; border-radius: var(--r); }
 
 /* ══ FORMS & CARDS ════════════════════════════════════════════════ */
-/* NOTE: Cards now use dynamic accent borders based on their module */
 .card, .form-card {
   background: var(--surface);
   border: 1px solid var(--border-soft);
@@ -379,13 +379,7 @@ a { color: inherit; text-decoration: none; }
 .fin-stat-card .amount { font-family: var(--serif); font-size: 1.5rem; font-weight: 700; }
 .fin-stat-card .note { font-family: var(--mono); font-size: .58rem; color: var(--ink-3); margin-top: .2rem; }
 
-.fin-unpaid-bar { background: var(--surface); border: 1px solid var(--border-soft); border-top: 3px solid var(--mod-accent); border-radius: var(--r-lg); padding: 1.4rem 1.5rem; display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.25rem; box-shadow: var(--shadow); }
-.fin-unpaid-bar.has-bills { border-color: #4a3a10; }
-.fin-unpaid-bar .left { display: flex; align-items: center; gap: .7rem; }
-.fin-unpaid-bar .icon { width: 36px; height: 36px; border-radius: 50%; background: var(--amber-lt); border: 1px solid #4a3a10; display: flex; align-items: center; justify-content: center; font-size: .9rem; }
-.fin-unpaid-bar .label { font-family: var(--mono); font-size: .6rem; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-3); margin-bottom: .15rem; }
-.fin-unpaid-bar .count { font-size: .75rem; color: var(--ink-2); }
-.fin-unpaid-bar .total { font-family: var(--serif); font-size: 1.4rem; font-weight: 700; color: var(--amber); }
+.card#fin-unpaid-card { border-color: var(--amber-lt); padding: 1.25rem 1.4rem; }
 
 /* Ledger toggle */
 .ledger-toggle { display: flex; align-items: center; justify-content: space-between; margin-bottom: .75rem; padding: .4rem .5rem; cursor: pointer; border-radius: var(--r); transition: background var(--transition); }
@@ -680,15 +674,16 @@ a { color: inherit; text-decoration: none; }
     </div>
   </div>
 
-  <div class="fin-unpaid-bar" id="fin-unpaid-bar">
-    <div class="left">
-      <div class="icon">⏱</div>
-      <div>
-        <div class="label">Unpaid Bills</div>
-        <div class="count" id="fin-unpaid-count">None outstanding</div>
+  <div class="card" id="fin-unpaid-card" style="display:none; border-color: var(--amber-lt); padding: 1.25rem 1.4rem;">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 1rem;">
+      <div style="display:flex; align-items:center; gap:.5rem;">
+        <span style="font-size:1.2rem;">⏱</span>
+        <h3 style="font-family: var(--serif); font-size: 1.1rem; margin: 0; color: var(--ink);">Unpaid Bills</h3>
       </div>
+      <strong id="fin-unpaid-total" style="font-family: var(--serif); font-size: 1.4rem; color: var(--amber);">$0.00</strong>
     </div>
-    <div class="total" id="fin-unpaid-total">$0.00</div>
+    <div id="fin-unpaid-list" style="display:flex; flex-direction:column; gap: .5rem;">
+      </div>
   </div>
 
   <div class="sync-banner" id="fin-shop-sync-banner" style="display:none;">
@@ -765,8 +760,8 @@ a { color: inherit; text-decoration: none; }
 
     <div class="form-row" id="field-due-date" style="display:none;margin-top:.65rem;">
       <div class="form-group" style="flex:1;min-width:140px;">
-        <label style="color:var(--rose)">Due Date</label>
-        <input type="date" id="tx-due-date" style="border-color:#3a1a1a;">
+        <label style="color:var(--amber)">Due Date</label>
+        <input type="date" id="tx-due-date" style="border-color:var(--amber-lt);">
       </div>
     </div>
 
@@ -1360,45 +1355,53 @@ async function importFromUrl() {
   } catch(err){toast('Error importing. Cloud function may not be deployed.','danger');}
   finally{btn.textContent='Import';btn.disabled=false;}
 }
+
+// ── NEW: SCORING HEURISTIC PARSER ──
 function parseRawRecipeText() {
   const raw = document.getElementById('rec-smart-paste').value.trim();
   if (!raw) { toast('Paste text first.', 'warn'); return; }
 
-  // 1. Expanded dictionaries to catch more formats
+  const lines = raw.split('\n').map(l => l.trim().replace(/^[\-\*•\d\.\)]+\s*/, '')).filter(l => l.length > 0);
+  let items = [], insts = [];
+
   const unitRx = /\b(cup|cups|c|tbsp|tsp|teaspoon|tablespoon|oz|ounce|lb|lbs|pound|g|gram|kg|ml|liter|clove|pinch|can|package|slice|piece|bottle|bottles|btl|roll|rolls|box|boxes|pump|pumps|scoop|scoops|drop|drops|spray|sprays|pad|pads|sheet|sheets|wipe|wipes|load|loads)\b/i;
   const numRx = /^[\d\u00BC-\u00BE\u2150-\u215E]/;
-  const bulletRx = /^[\-\*•]\s*/; // Catches dashed or bulleted lists
-
-  const lines = raw.split('\n').map(l => l.trim()).filter(l => l.length > 0);
-  let items = [], insts = [];
+  const verbRx = /^(cook|roast|heat|bake|preheat|stir|mix|chop|dice|mince|boil|simmer|fry|combine|add|place|pour|whisk|serve|bring|let|set|cover|turn)/i;
+  const headerRx = /(ingredients|instructions|method|directions|supplies|notes|recipe)/i;
 
   lines.forEach(line => {
     const ll = line.toLowerCase();
-    // Skip common website headers
-    if (['ingredients','instructions','method','directions','items needed','supplies'].includes(ll)) return;
-
-    // 2. Smarter Sorting Logic
-    const isShort = line.length < 80;
-    const hasUnit = unitRx.test(line);
-    const startsWithNum = numRx.test(line);
-    const startsWithBullet = bulletRx.test(line);
-    const endsWithPunct = /[.!?]$/.test(line);
-
-    // If it's short AND (has a bullet, a number, a unit, or lacks sentence punctuation) -> It is an ingredient
-    if (isShort && (hasUnit || startsWithNum || startsWithBullet || !endsWithPunct)) {
-      items.push(line.replace(bulletRx, '')); // Strip the bullet before moving to Required Items
-    } else {
-      insts.push(line.replace(/^\d+[\.\)]\s*/, '')); // Strip numbered formatting for Instructions
+    
+    // 1. Skip absolute junk or obvious main headers
+    if (ll.length < 3) return; 
+    if (headerRx.test(ll) && ll.length < 20) return;
+    
+    // 2. Section Headers (The Header Killer)
+    if (line.endsWith(':') || (ll.startsWith('for the') && ll.length < 30)) {
+       return; // Skip section headers entirely
     }
+
+    let score = 0;
+    if (line.length < 50) score += 1; // Short text gets a small point
+    if (numRx.test(line)) score += 2;
+    if (unitRx.test(line)) score += 2;
+    if (/[.!?]$/.test(line)) score -= 2;
+    if (verbRx.test(line)) score -= 3;
+    
+    // Common unnumbered ingredients
+    if (/\b(salt|pepper|oil|water|butter|sugar)\b/i.test(line)) score += 2;
+
+    if (score >= 2) items.push(line);
+    else insts.push(line);
   });
 
-  // 3. Auto-populate the modal fields
   if (items.length > 0) document.getElementById('rec-ingredients').value = items.join('\n');
   if (insts.length > 0) document.getElementById('rec-instructions').value = insts.map((s, i) => `${i + 1}. ${s}`).join('\n\n');
   
   document.getElementById('rec-smart-paste').value = '';
-  toast('Text sorted! Review Required Items before saving.', 'success');
+  toast('Text smartly sorted! Review before saving.', 'success');
 }
+
 function saveRecipe(e) {
   if(e) e.preventDefault();
   const name=document.getElementById('rec-name').value.trim();
@@ -1414,12 +1417,43 @@ function saveRecipe(e) {
   openRecipeDetail(newId);
   toast('Plan saved!','success');
 }
+
+// ── NEW: AGGREGATION / DEDUPLICATION LOGIC ──
 function parseIngredientLines(raw) {
-  return raw.split('\n').map(l=>l.trim()).filter(Boolean).map(line=>{
-    const p=parseSpokenItem(line);
-    return {raw:line,qty:p.qty,unit:p.unit,name:p.name||line};
+  const parsedItems = [];
+  raw.split('\n').map(l => l.trim()).filter(Boolean).forEach(line => {
+    // Backup filter for headers manually typed into the box
+    if (line.endsWith(':') || line.toLowerCase().startsWith('for ')) return; 
+    
+    let cleanName = line.split(',')[0].trim();
+    cleanName = cleanName.replace(/\(.*?\)/g, '').trim();
+    
+    const p = parseSpokenItem(cleanName);
+    const finalName = (p.name ? p.name : cleanName.replace(/^[\d\s\u00BC-\u00BE\u2150-\u215E]+/, '').trim()).toLowerCase();
+    
+    const existing = parsedItems.find(i => i.name.toLowerCase() === finalName);
+
+    if (existing) {
+      // If units match, add the math. If they don't, append the text.
+      if (existing.unit === p.unit) {
+          existing.qty += (p.qty || 1);
+          existing.raw = `${existing.qty} ${existing.unit} ${finalName.replace(/\b\w/g, c => c.toUpperCase())}`;
+      } else {
+          // e.g. "1 cup flour + 2 tbsp"
+          existing.raw = `${existing.raw} + ${p.qty} ${p.unit}`; 
+      }
+    } else {
+      parsedItems.push({
+        raw: line,
+        qty: p.qty || 1,
+        unit: p.unit || '',
+        name: finalName.replace(/\b\w/g, c => c.toUpperCase())
+      });
+    }
   });
+  return parsedItems;
 }
+
 function buildInventoryMap() { const m=new Map(); inventory.forEach(i=>m.set(i.name.toLowerCase(),i)); return m; }
 function calcRecipeCost(rec,invMap) {
   return rec.ingredients.reduce((sum,ing)=>{
@@ -1556,18 +1590,42 @@ function renderFinanceDashboard() {
   // Stats
   document.getElementById('fin-income-total').textContent=fmt$(income);
   document.getElementById('fin-spend-total').textContent=fmt$(spend);
-  // Unpaid bills
-  const unpaidBills=transactions.filter(t=>t.type==='bill'&&!t.isPaid);
-  document.getElementById('fin-unpaid-total').textContent=fmt$(unpaid);
-  const countEl=document.getElementById('fin-unpaid-count');
-  const barEl=document.getElementById('fin-unpaid-bar');
-  if(unpaidBills.length===0){countEl.textContent='None outstanding';barEl.classList.remove('has-bills');}
-  else{countEl.textContent=`${unpaidBills.length} bill${unpaidBills.length>1?'s':''} pending`;barEl.classList.add('has-bills');}
-  // Ledger
+  // Explicit Unpaid Bills List
+  const unpaidBills = transactions.filter(t=>t.type==='bill'&&!t.isPaid).sort((a,b)=>new Date(a.dueDate||0)-new Date(b.dueDate||0));
+  const cardEl = document.getElementById('fin-unpaid-card');
+  const listEl = document.getElementById('fin-unpaid-list');
+  document.getElementById('fin-unpaid-total').textContent = fmt$(unpaid);
+
+  if (unpaidBills.length === 0) {
+    cardEl.style.display = 'none';
+  } else {
+    cardEl.style.display = 'block';
+    listEl.innerHTML = '';
+    unpaidBills.forEach(tx => {
+      const daysAway = daysDiff(new Date(), new Date(tx.dueDate));
+      let bc = 'badge-neutral', bt = `Due ${fmtDate(tx.dueDate)}`;
+      
+      if (daysAway < 0) { bc = 'badge-danger'; bt = `Overdue ${Math.abs(daysAway)}d`; }
+      else if (daysAway === 0) { bc = 'badge-danger'; bt = 'Due today'; }
+      else if (daysAway <= 3) { bc = 'badge-warn'; bt = `Due in ${daysAway}d`; }
+
+      listEl.innerHTML += `
+        <div style="display:flex; justify-content:space-between; align-items:center; padding: .8rem; background: var(--bg-2); border: 1px solid var(--border); border-radius: var(--r);">
+          <div>
+            <div style="font-weight:600; font-size:.85rem; color: var(--ink);">${sanitize(tx.description)}</div>
+            <div style="font-family:var(--mono); font-size:.6rem; color:var(--ink-3); margin-top:.2rem;">Billed: ${fmtDate(tx.date)}</div>
+          </div>
+          <div style="text-align:right;">
+            <div style="font-family:var(--mono); font-weight:500; font-size:.85rem; color: var(--amber); margin-bottom:.3rem;">${fmt$(tx.amount)}</div>
+            <span class="badge ${bc}">${bt}</span>
+          </div>
+        </div>`;
+    });
+  }
+
   renderLedger();
   updateBadges();
   updateFinShopSync();
-  // Update masthead
   const hb=document.getElementById('header-balance');
   hb.textContent=fmt$(available);
   hb.className='amt'+(available<0?' neg':'');
@@ -1589,6 +1647,7 @@ function renderLedger() {
     else if(tx.type==='spend'){icon='↓';amtColor='var(--fin-spend)';prefix='−';iconBg='var(--rose-lt)';}
     else if(isPaidBill){icon='✓';amtColor='var(--ink-3)';prefix='−';iconBg='var(--surface-2)';}
     else{icon='⏱';amtColor='var(--amber)';prefix='';iconBg='var(--amber-lt)';}
+    
     const daysAway=isUnpaid?daysDiff(new Date(),new Date(tx.dueDate)):null;
     let dueBadge='';
     if(isUnpaid){
@@ -1598,8 +1657,9 @@ function renderLedger() {
       else if(daysAway<=3){bc='badge-warn';bt=`Due in ${daysAway}d`;}
       dueBadge=`<span class="badge ${bc}" style="margin-left:.4rem">${bt}</span>`;
     }
+    
     const shopTag = tx.fromShopping ? '<span class="badge badge-sky" style="margin-left:.4rem">🛒 shopping</span>' : '';
-    const dateLabel=isUnpaid?`<span style="color:var(--ink-3)">Logged · unpaid</span>`:`<span style="color:var(--ink-3)">${fmtDate(tx.date)}${isPaidBill?' · paid bill':''}</span>`;
+    const dateLabel=isUnpaid?`<span style="color:var(--ink-3)">Billed: ${fmtDate(tx.date)}</span>`:`<span style="color:var(--ink-3)">${fmtDate(tx.date)}${isPaidBill?' · paid bill':''}</span>`;
     const payBtn=isUnpaid?`<button onclick="payBill('${tx.id}')" class="btn btn-fin btn-sm">✓ Pay</button>`:'';
     const div=document.createElement('div');
     div.className='ledger-item';
@@ -1636,21 +1696,22 @@ function updateFinFormUI() {
   const lblDate=document.getElementById('lbl-date');
   const billToggle=document.getElementById('bill-paid-toggle');
   const btn=document.getElementById('btn-submit-tx');
+  
   billToggle.style.display='none';
-  document.getElementById('field-due-date').style.display='none';
-  document.getElementById('field-date').style.display='flex';
-  document.getElementById('tx-due-date').required=false;
-  document.getElementById('tx-date').required=true;
   if(type==='income'){lblDesc.textContent='Source';lblDate.textContent='Date Received';document.getElementById('tx-description').placeholder='e.g. Salary, Freelance';btn.textContent=editingTxId?'Update Income':'Save Income';}
   else if(type==='spend'){lblDesc.textContent='Vendor';lblDate.textContent='Date Spent';document.getElementById('tx-description').placeholder='e.g. Grocery Store';btn.textContent=editingTxId?'Update Spend':'Save Spend';}
-  else if(type==='bill'){lblDesc.textContent='Biller';document.getElementById('tx-description').placeholder='e.g. Electricity Co.';billToggle.style.display='flex';btn.textContent=editingTxId?'Update Bill':'Save Bill';syncBillDateLabel();}
+  else if(type==='bill'){lblDesc.textContent='Biller';document.getElementById('tx-description').placeholder='e.g. Electricity Co.';billToggle.style.display='flex';btn.textContent=editingTxId?'Update Bill':'Save Bill';}
+  
+  syncBillDateLabel();
 }
+
 function toggleBillPaid() {
   const cb=document.getElementById('tx-is-paid');
   cb.checked=!cb.checked;
   syncBillPaidUI(cb.checked);
   syncBillDateLabel();
 }
+
 function syncBillPaidUI(paid) {
   const row=document.getElementById('bill-paid-toggle');
   const icon=document.getElementById('bill-paid-icon');
@@ -1659,24 +1720,51 @@ function syncBillPaidUI(paid) {
   if(paid){icon.textContent='✅';text.textContent='I have already paid this';text.style.color='var(--sky)';sub.style.color='var(--sky)';row.className='bill-toggle-row';}
   else{icon.textContent='⏱';text.textContent='This is unpaid / due soon';text.style.color='var(--rose)';sub.style.color='var(--rose)';row.className='bill-toggle-row unpaid';}
 }
+
 function syncBillDateLabel() {
-  const paid=document.getElementById('tx-is-paid').checked;
-  if(paid){document.getElementById('field-due-date').style.display='none';document.getElementById('field-date').style.display='flex';document.getElementById('tx-due-date').required=false;document.getElementById('tx-date').required=true;}
-  else{document.getElementById('field-due-date').style.display='flex';document.getElementById('field-date').style.display='none';document.getElementById('tx-due-date').required=true;document.getElementById('tx-date').required=false;}
+  const type = document.querySelector('input[name="txType"]:checked')?.value;
+  const paid = document.getElementById('tx-is-paid').checked;
+  const lblDate = document.getElementById('lbl-date');
+  
+  document.getElementById('field-date').style.display='flex';
+  document.getElementById('tx-date').required=true;
+  
+  if (type === 'bill') {
+      if(paid) {
+          document.getElementById('field-due-date').style.display='none';
+          document.getElementById('tx-due-date').required=false;
+          lblDate.textContent = 'Date Paid';
+      } else {
+          document.getElementById('field-due-date').style.display='flex';
+          document.getElementById('tx-due-date').required=true;
+          lblDate.textContent = 'Date Billed';
+      }
+  } else {
+      document.getElementById('field-due-date').style.display='none';
+      document.getElementById('tx-due-date').required=false;
+  }
 }
+
 function handleLogTransaction(e) {
   e.preventDefault();
   const btn=document.getElementById('btn-submit-tx');
   btn.textContent='Saving…';btn.disabled=true;
+  
   setTimeout(()=>{
     const type=document.querySelector('input[name="txType"]:checked').value;
     const amount=parseFloat(document.getElementById('tx-amount').value);
     const description=document.getElementById('tx-description').value.trim();
     let date=document.getElementById('tx-date').value;
-    let isPaid=true,dueDate=null;
-    if(type==='bill'){isPaid=document.getElementById('tx-is-paid').checked;if(!isPaid){dueDate=document.getElementById('tx-due-date').value;date=null;}}
+    let isPaid=true, dueDate=null;
+    
+    if(type==='bill'){
+        isPaid=document.getElementById('tx-is-paid').checked;
+        if(!isPaid){ dueDate=document.getElementById('tx-due-date').value; }
+    }
+    
     if(isNaN(amount)||amount<=0){toast('Enter a valid amount.','danger');btn.textContent='Save';btn.disabled=false;return;}
     if(!description){toast('Description required.','danger');btn.textContent='Save';btn.disabled=false;return;}
+    
     const wasEdit=!!editingTxId;
     if(editingTxId){
       const idx=transactions.findIndex(t=>t.id===editingTxId);
@@ -1684,6 +1772,7 @@ function handleLogTransaction(e) {
     } else {
       transactions.push({id:uid(),type,amount,description,date,isPaid,dueDate,createdAt:new Date().toISOString()});
     }
+    
     saveFinanceLocally();
     btn.textContent='✓ Saved!';
     setTimeout(()=>{
@@ -1693,6 +1782,7 @@ function handleLogTransaction(e) {
     },700);
   },150);
 }
+
 function editTx(id) {
   const tx=transactions.find(t=>t.id===id); if(!tx) return;
   editingTxId=id;
@@ -1700,16 +1790,26 @@ function editTx(id) {
   updateFinFormUI();
   document.getElementById('tx-amount').value=tx.amount;
   document.getElementById('tx-description').value=tx.description;
-  if(tx.type==='bill'){document.getElementById('tx-is-paid').checked=tx.isPaid;syncBillPaidUI(tx.isPaid);syncBillDateLabel();if(tx.isPaid) document.getElementById('tx-date').value=tx.date;else document.getElementById('tx-due-date').value=tx.dueDate;}
-  else document.getElementById('tx-date').value=tx.date;
+  document.getElementById('tx-date').value=tx.date;
+  
+  if(tx.type==='bill'){
+      document.getElementById('tx-is-paid').checked=tx.isPaid;
+      syncBillPaidUI(tx.isPaid);
+      syncBillDateLabel();
+      if(!tx.isPaid) document.getElementById('tx-due-date').value=tx.dueDate;
+  }
+  
   document.getElementById('btn-submit-tx').textContent='Update Transaction';
   document.getElementById('btn-cancel-edit').style.display='';
   showView('log-tx', document.querySelector('.pnav-btn:nth-child(5)'));
 }
+
 function cancelEdit() {
   editingTxId=null;
   document.getElementById('fin-tx-form').reset();
-  document.getElementById('tx-date').value=new Date().toISOString().split('T')[0];
+  const today = new Date().toISOString().split('T')[0];
+  document.getElementById('tx-date').value=today;
+  document.getElementById('tx-due-date').value=today;
   document.getElementById('tx-is-paid').checked=true;
   syncBillPaidUI(true);
   updateFinFormUI();
@@ -1717,16 +1817,19 @@ function cancelEdit() {
   document.getElementById('btn-submit-tx').disabled=false;
   document.getElementById('btn-submit-tx').textContent='Save Transaction';
 }
+
 function deleteTx(id) {
   if(!confirm('Delete this transaction?')) return;
   transactions=transactions.filter(t=>t.id!==id);
   saveFinanceLocally();
   toast('Transaction deleted.','');
 }
+
 function payBill(id) {
   const tx=transactions.find(t=>t.id===id);
   if(tx){tx.isPaid=true;tx.date=new Date().toISOString().split('T')[0];tx.dueDate=null;saveFinanceLocally();toast('Bill marked as paid!','success');}
 }
+
 function saveFinanceLocally() {
   localStorage.setItem('tightShipTransactions',JSON.stringify(transactions));
   renderFinanceDashboard();
@@ -1749,18 +1852,16 @@ function downloadCSV() {
   document.body.appendChild(a);a.click();document.body.removeChild(a);
   toast('Finance ledger exported.','success');
 }
+
 function shareApp() {
   if(navigator.share) navigator.share({title:'HQ Command Centre',url:window.location.href}).catch(()=>{});
   else {
     navigator.clipboard.writeText(window.location.href).then(()=>toast('Link copied!','success')).catch(()=>{});
   }
 }
-function promptWipeFinance() {
-  document.getElementById('wipe-overlay').classList.add('open');
-}
-function closeConfirm() {
-  document.getElementById('wipe-overlay').classList.remove('open');
-}
+
+function promptWipeFinance() { document.getElementById('wipe-overlay').classList.add('open'); }
+function closeConfirm() { document.getElementById('wipe-overlay').classList.remove('open'); }
 function executeWipeFinance() {
   transactions=[];
   localStorage.removeItem('tightShipTransactions');
@@ -1821,6 +1922,7 @@ function startVoice(target) {
   recognition.onend=()=>{if(micBtn) micBtn.classList.remove('listening');recognition=null;};
   try{recognition.start();}catch(e){toast('Could not start voice.','warn');if(micBtn)micBtn.classList.remove('listening');recognition=null;}
 }
+
 function applyVoiceInput(target,transcript) {
   const p=parseSpokenItem(transcript);
   if(target==='use'){
