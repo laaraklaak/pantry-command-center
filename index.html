@@ -225,8 +225,8 @@ a { color: inherit; text-decoration: none; }
 .form-group textarea { resize: vertical; min-height: 72px; }
 .form-row { display: flex; gap: .65rem; align-items: flex-end; flex-wrap: wrap; }
 .form-row .form-group { flex: 1; min-width: 130px; }
-.input-mic-wrap { display: flex; gap: .4rem; align-items: center; }
-.input-mic-wrap input { flex: 1; }
+.input-mic-wrap { display: flex; gap: .4rem; align-items: center; position: relative; }
+.input-mic-wrap input, .input-mic-wrap textarea { flex: 1; }
 
 /* ══ TABLES ═════════════════════════════════════════════════════ */
 .data-table-wrap {
@@ -891,17 +891,11 @@ a { color: inherit; text-decoration: none; }
       <button type="button" class="btn btn-ghost btn-sm" onclick="closeModal('recipe-modal')">✕</button>
     </div>
     <div class="modal-body">
-      <div class="form-card" style="background:var(--surface-2);border-color:var(--border-soft);margin-bottom:1rem;padding:.9rem;">
-        <h3 style="margin-bottom:.4rem;color:var(--mod-accent);font-size:.85rem;">🌐 Import from URL</h3>
-        <div class="input-mic-wrap" style="align-items:flex-end;">
-          <input type="url" id="rec-url-import" placeholder="https://..." style="background:var(--bg-2);">
-          <button type="button" class="btn btn-primary btn-sm" id="btn-import-url" onclick="importFromUrl()">Import</button>
-        </div>
-      </div>
+      
       <div class="form-card" style="background:var(--surface-2);border-color:var(--border-soft);margin-bottom:1rem;padding:.9rem;">
         <h3 style="margin-bottom:.4rem;font-size:.85rem;">📋 Smart Paste</h3>
         <div class="input-mic-wrap" style="align-items:flex-end;">
-          <textarea id="rec-smart-paste" placeholder="Paste raw recipe text here..." rows="3" style="background:var(--bg-2);"></textarea>
+          <textarea id="rec-smart-paste" placeholder="Paste raw recipe text here to extract instructions..." rows="3" style="background:var(--bg-2);"></textarea>
           <button type="button" class="btn btn-ghost btn-sm" onclick="parseRawRecipeText()">Sort</button>
         </div>
       </div>
@@ -914,7 +908,18 @@ a { color: inherit; text-decoration: none; }
           <select id="rec-cat"><option>Breakfast</option><option>Lunch</option><option selected>Dinner</option><option>Snack</option><option>Dessert</option><option>Cleaning Plan</option></select>
         </div>
       </div>
-      <div class="form-group" style="margin-bottom:.65rem;"><label>Required Items (one per line: "2 lbs rice") *</label><textarea id="rec-ingredients" placeholder="2 lbs jasmine rice&#10;1 btl soy sauce" rows="5" required></textarea></div>
+      
+      <div class="form-group" style="margin-bottom:.65rem;">
+        <label>Required Items (one per line: "2 lbs rice") *</label>
+        <div class="input-mic-wrap" style="align-items: flex-end;">
+            <textarea id="rec-ingredients" placeholder="2 lbs jasmine rice&#10;1 btl soy sauce" rows="5" required style="width: 100%;"></textarea>
+            <button class="mic-btn" id="rec-mic-btn" onclick="startVoice('recipe-ingredients')" type="button" title="Dictate Ingredients">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="9" y="2" width="6" height="11" rx="3"/><path d="M5 10a7 7 0 0014 0M12 19v3M9 22h6"/></svg>
+            </button>
+        </div>
+        <div class="voice-status" id="rec-voice-status"></div>
+      </div>
+      
       <div class="form-group"><label>Instructions</label><textarea id="rec-instructions" placeholder="Step-by-step..." rows="4"></textarea></div>
     </div>
     <div class="modal-footer">
@@ -940,7 +945,6 @@ a { color: inherit; text-decoration: none; }
 
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-functions.js"></script>
 
 <script>
 /* ══════════════════════════════════════════════════════════════════
@@ -1326,37 +1330,12 @@ function logShoppingToFinance() {
 ══════════════════════════════════════════════════════════════════ */
 function openAddRecipeModal() {
   ['rec-name','rec-servings','rec-time','rec-ingredients','rec-instructions','rec-smart-paste'].forEach(id => { const el=document.getElementById(id); if(el) el.value=''; });
-  document.getElementById('rec-url-import').value='';
   document.getElementById('rec-cat').value='Dinner';
   openModal('recipe-modal');
   setTimeout(()=>document.getElementById('rec-name').focus(),80);
 }
-async function importFromUrl() {
-  const urlInput=document.getElementById('rec-url-import').value.trim();
-  if(!urlInput){toast('Please enter a URL.','warn');return;}
-  const btn=document.getElementById('btn-import-url');
-  btn.textContent='Importing…';btn.disabled=true;
-  try {
-    const fn=firebase.functions().httpsCallable('scrapeRecipe');
-    const result=await fn({url:urlInput});
-    if(result.data.success){
-      const r=result.data.recipe;
-      document.getElementById('rec-name').value=r.name||'';
-      if(r.ingredients&&Array.isArray(r.ingredients)) document.getElementById('rec-ingredients').value=r.ingredients.join('\n');
-      if(r.instructions){
-        let inst='';
-        if(Array.isArray(r.instructions)) inst=r.instructions.map((s,i)=>`${i+1}. ${typeof s==='string'?s:s.text||''}`).join('\n\n');
-        else inst=r.instructions;
-        document.getElementById('rec-instructions').value=inst;
-      }
-      document.getElementById('rec-url-import').value='';
-      toast('Recipe imported!','success');
-    } else {toast(result.data.error||'Could not extract recipe data.','warn');}
-  } catch(err){toast('Error importing. Cloud function may not be deployed.','danger');}
-  finally{btn.textContent='Import';btn.disabled=false;}
-}
 
-// ── NEW: SCORING HEURISTIC PARSER ──
+// ── HEURISTIC PARSER (WITH HEADER KILLER) ──
 function parseRawRecipeText() {
   const raw = document.getElementById('rec-smart-paste').value.trim();
   if (!raw) { toast('Paste text first.', 'warn'); return; }
@@ -1367,6 +1346,7 @@ function parseRawRecipeText() {
   const unitRx = /\b(cup|cups|c|tbsp|tsp|teaspoon|tablespoon|oz|ounce|lb|lbs|pound|g|gram|kg|ml|liter|clove|pinch|can|package|slice|piece|bottle|bottles|btl|roll|rolls|box|boxes|pump|pumps|scoop|scoops|drop|drops|spray|sprays|pad|pads|sheet|sheets|wipe|wipes|load|loads)\b/i;
   const numRx = /^[\d\u00BC-\u00BE\u2150-\u215E]/;
   const verbRx = /^(cook|roast|heat|bake|preheat|stir|mix|chop|dice|mince|boil|simmer|fry|combine|add|place|pour|whisk|serve|bring|let|set|cover|turn)/i;
+  const timeTempRx = /\b(minute|minutes|min|mins|hour|hours|hr|hrs|degree|degrees|f|c)\b/i; 
   const headerRx = /(ingredients|instructions|method|directions|supplies|notes|recipe)/i;
 
   lines.forEach(line => {
@@ -1387,6 +1367,7 @@ function parseRawRecipeText() {
     if (unitRx.test(line)) score += 2;
     if (/[.!?]$/.test(line)) score -= 2;
     if (verbRx.test(line)) score -= 3;
+    if (timeTempRx.test(line)) score -= 2; // Penalize lines mentioning times/temps as instructions
     
     // Common unnumbered ingredients
     if (/\b(salt|pepper|oil|water|butter|sugar)\b/i.test(line)) score += 2;
@@ -1395,8 +1376,16 @@ function parseRawRecipeText() {
     else insts.push(line);
   });
 
-  if (items.length > 0) document.getElementById('rec-ingredients').value = items.join('\n');
-  if (insts.length > 0) document.getElementById('rec-instructions').value = insts.map((s, i) => `${i + 1}. ${s}`).join('\n\n');
+  if (items.length > 0) {
+      const currentItems = document.getElementById('rec-ingredients').value;
+      document.getElementById('rec-ingredients').value = currentItems ? currentItems + '\n' + items.join('\n') : items.join('\n');
+  }
+  
+  if (insts.length > 0) {
+      const currentInsts = document.getElementById('rec-instructions').value;
+      const newInsts = insts.map((s, i) => `${i + 1}. ${s}`).join('\n\n');
+      document.getElementById('rec-instructions').value = currentInsts ? currentInsts + '\n\n' + newInsts : newInsts;
+  }
   
   document.getElementById('rec-smart-paste').value = '';
   toast('Text smartly sorted! Review before saving.', 'success');
@@ -1418,7 +1407,7 @@ function saveRecipe(e) {
   toast('Plan saved!','success');
 }
 
-// ── NEW: AGGREGATION / DEDUPLICATION LOGIC ──
+// ── AGGREGATION / DEDUPLICATION LOGIC ──
 function parseIngredientLines(raw) {
   const parsedItems = [];
   raw.split('\n').map(l => l.trim()).filter(Boolean).forEach(line => {
@@ -1901,12 +1890,24 @@ function startVoice(target) {
   if(!SR){toast('Voice input not supported in this browser.','warn');return;}
   voiceTarget=target;
   let micBtn,statusEl;
+  
+  // Set up specific UI connections based on what button was clicked
   if(target==='use') statusEl=document.getElementById('universal-voice-status');
-  else{micBtn=document.getElementById(target==='inventory'?'inv-mic-btn':'sl-mic-btn');statusEl=document.getElementById(target==='inventory'?'inv-voice-status':'sl-voice-status');}
+  else if(target==='recipe-ingredients') {
+      micBtn=document.getElementById('rec-mic-btn');
+      statusEl=document.getElementById('rec-voice-status');
+  }
+  else {
+      micBtn=document.getElementById(target==='inventory'?'inv-mic-btn':'sl-mic-btn');
+      statusEl=document.getElementById(target==='inventory'?'inv-voice-status':'sl-voice-status');
+  }
+  
   if(recognition){recognition.abort();recognition=null;if(micBtn) micBtn.classList.remove('listening');if(statusEl) statusEl.textContent='';return;}
   recognition=new SR();recognition.lang='en-US';recognition.interimResults=false;recognition.maxAlternatives=1;
+  
   if(micBtn) micBtn.classList.add('listening');
   if(statusEl) statusEl.textContent=target==='use'?'🎤 Say "I used 2 rolls of paper towels"':'Listening…';
+  
   recognition.onresult=e=>{
     const t=e.results[0][0].transcript;
     if(statusEl) statusEl.textContent=`"${t}"`;
@@ -1924,7 +1925,18 @@ function startVoice(target) {
 }
 
 function applyVoiceInput(target,transcript) {
+  // If the target is the recipe ingredients box, simply append the text directly
+  if (target === 'recipe-ingredients') {
+      const textarea = document.getElementById('rec-ingredients');
+      const currentVal = textarea.value;
+      // Append the dictated line, taking care to add a newline if the box isn't empty
+      textarea.value = currentVal ? currentVal + '\n' + transcript : transcript;
+      toast('Ingredient added!', 'success');
+      return;
+  }
+
   const p=parseSpokenItem(transcript);
+  
   if(target==='use'){
     if(!p.name){toast('Could not understand item name.','warn');return;}
     const nl=p.name.toLowerCase();
