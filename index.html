@@ -2,42 +2,101 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>間食倉庫 · Pantry Command</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>HQ · Command Centre v2</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@300;400;600&family=DM+Mono:wght@300;400;500&family=Shippori+Mincho:wght@400;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;500;700&family=DM+Mono:wght@300;400;500&family=Syne:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
 <style>
-/* ─── DESIGN TOKENS ─────────────────────────────── */
+/* ══════════════════════════════════════════════════════════════════
+   DESIGN TOKENS — DARK ZEN COMMAND CENTRE
+══════════════════════════════════════════════════════════════════ */
 :root {
-  --bg:        #f4f1ec;
-  --surface:   #faf8f4;
-  --border:    #ddd9d0;
-  --border-soft:#e8e4dc;
-  --ink:       #1a1814;
-  --ink-2:     #4a453e;
-  --ink-3:     #8a837a;
-  --bamboo:    #5c7a4a;
-  --bamboo-lt: #e8f0e4;
-  --bamboo-dk: #3d5230;
-  --slate:     #4a5568;
-  --warn:      #8b6914;
-  --warn-lt:   #fdf3dc;
-  --danger:    #7a3535;
-  --danger-lt: #fdf0f0;
-  --shadow:    0 1px 3px rgba(26,24,20,.08), 0 4px 12px rgba(26,24,20,.04);
-  --shadow-lg: 0 2px 8px rgba(26,24,20,.10), 0 8px 24px rgba(26,24,20,.06);
-  --radius:    6px;
-  --radius-lg: 12px;
-  --serif:     'Shippori Mincho', 'Noto Serif JP', serif;
-  --mono:      'DM Mono', monospace;
-  --sans:      'Noto Serif JP', serif;
-  --transition: 0.18s cubic-bezier(.4,0,.2,1);
+  /* Base Palette - Deep slate to reduce eye strain */
+  --bg:          #111413; 
+  --bg-2:        #181c1a;
+  
+  /* Global default surfaces (overridden by modules below) */
+  --surface:     #1e2421; 
+  --surface-2:   #252b28;
+  --border:      #303834;
+  --border-soft: #262c29;
+  --mod-accent:  #5c6660;
+  
+  /* Text - Crisp but not blinding white */
+  --ink:         #f0f2f0; 
+  --ink-2:       #b5bfb9;
+  --ink-3:       #7a8780;
+  --ink-4:       #4c5751;
+
+  /* Accents - Calmed down for readability and elegance */
+  --grove:       #66a87b; /* Muted bamboo green */
+  --grove-lt:    #223a2a;
+  --grove-dk:    #4d8a5f;
+  
+  --amber:       #dcb85c; /* Soft warning yellow */
+  --amber-lt:    #3a2e15;
+  
+  --rose:        #d16a65; /* Soft danger red */
+  --rose-lt:     #3d1a19;
+  
+  --sky:         #6ba4c7; /* Soft informational blue */
+  --sky-lt:      #172b38;
+
+  /* Finance colors */
+  --fin-income:  var(--grove);
+  --fin-spend:   var(--rose);
+  --fin-bill:    var(--sky);
+
+  /* Shadows - Smoother depth */
+  --shadow:      0 2px 6px rgba(0,0,0,0.3);
+  --shadow-lg:   0 8px 24px rgba(0,0,0,0.4);
+
+  /* Radii */
+  --r:    8px;
+  --r-lg: 16px;
+  --r-xl: 24px;
+
+  /* Fonts */
+  --serif: 'Shippori Mincho', serif;
+  --mono:  'DM Mono', monospace;
+  --sans:  'Syne', sans-serif;
+
+  --transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* ─── RESET ─────────────────────────────────────── */
+/* ══ MODULE COLOR CODING (THE MAGIC TINTS) ══════════════════════ */
+#view-inventory {
+  --surface: #19231d;       /* Subtle green tint */
+  --surface-2: #212e26;
+  --border-soft: #283b30;
+  --mod-accent: var(--grove);
+}
+#view-shopping {
+  --surface: #161e26;       /* Subtle blue tint */
+  --surface-2: #1c2833;
+  --border-soft: #243545;
+  --mod-accent: var(--sky);
+}
+#view-menu {
+  --surface: #262118;       /* Subtle warm/amber tint */
+  --surface-2: #332b1e;
+  --border-soft: #403422;
+  --mod-accent: var(--amber);
+}
+#view-finance, #view-log-tx {
+  --surface: #211c26;       /* Subtle plum/amethyst tint */
+  --surface-2: #2b2433;
+  --border-soft: #382c42;
+  --mod-accent: #9f82b5;
+}
+#view-settings {
+  --mod-accent: var(--ink-3);
+}
+
+/* ══ RESET ══════════════════════════════════════════════════════ */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-html { font-size: 15px; scroll-behavior: smooth; }
+html { font-size: 14px; scroll-behavior: smooth; color-scheme: dark; }
 body {
   font-family: var(--sans);
   background: var(--bg);
@@ -45,1050 +104,725 @@ body {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  overflow-x: hidden;
 }
 button { cursor: pointer; font-family: inherit; }
-input, select, textarea { font-family: var(--mono); }
+input, select, textarea { font-family: var(--mono); color: var(--ink); }
 a { color: inherit; text-decoration: none; }
-
-/* ─── TOP HEADER ─────────────────────────────────── */
-.app-header {
-  background: var(--surface);
-  border-bottom: 1px solid var(--border);
-  padding: 0 2rem;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  height: 56px;
-  position: sticky;
-  top: 0;
-  z-index: 100;
-}
-.app-logo {
-  display: flex;
-  align-items: baseline;
-  gap: .6rem;
-}
-.app-logo .kanji {
-  font-family: var(--serif);
-  font-size: 1.15rem;
-  font-weight: 700;
-  letter-spacing: .08em;
-  color: var(--bamboo-dk);
-}
-.app-logo .subtitle {
-  font-family: var(--mono);
-  font-size: .68rem;
-  color: var(--ink-3);
-  letter-spacing: .12em;
-  text-transform: uppercase;
-}
-.status-pill {
-  display: flex;
-  align-items: center;
-  gap: .4rem;
-  font-family: var(--mono);
-  font-size: .68rem;
-  color: var(--ink-3);
-  letter-spacing: .06em;
-}
-.status-dot {
-  width: 7px; height: 7px;
-  border-radius: 50%;
-  background: var(--bamboo);
-  transition: background var(--transition);
-}
-.status-dot.offline { background: var(--warn); }
-
-/* ─── NAV ────────────────────────────────────────── */
-.app-nav {
-  background: var(--surface);
-  border-bottom: 1px solid var(--border);
-  display: flex;
-  padding: 0 2rem;
-  gap: 0;
-  overflow-x: auto;
-}
-.nav-btn {
-  background: none;
-  border: none;
-  border-bottom: 2px solid transparent;
-  padding: .75rem 1.4rem;
-  font-family: var(--mono);
-  font-size: .72rem;
-  letter-spacing: .1em;
-  text-transform: uppercase;
-  color: var(--ink-3);
-  white-space: nowrap;
-  transition: all var(--transition);
-  position: relative;
-}
-.nav-btn:hover { color: var(--ink-2); }
-.nav-btn.active {
-  color: var(--bamboo-dk);
-  border-bottom-color: var(--bamboo);
-  font-weight: 500;
-}
-.nav-badge {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  background: var(--warn);
-  color: #fff;
-  width: 16px; height: 16px;
-  border-radius: 50%;
-  font-size: .6rem;
-  margin-left: .4rem;
-  vertical-align: middle;
-}
-
-/* ─── MAIN LAYOUT ────────────────────────────────── */
-.app-main {
-  flex: 1;
-  padding: 2rem;
-  max-width: 1100px;
-  margin: 0 auto;
-  width: 100%;
-}
-.view { display: none; }
-.view.active { display: block; }
-
-/* ─── SECTION HEADER ─────────────────────────────── */
-.section-header {
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  margin-bottom: 1.5rem;
-  padding-bottom: 1rem;
-  border-bottom: 1px solid var(--border-soft);
-  gap: 1rem;
-  flex-wrap: wrap;
-}
-.section-title {
-  font-family: var(--serif);
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: var(--ink);
-  letter-spacing: .02em;
-  line-height: 1.1;
-}
-.section-title small {
-  display: block;
-  font-family: var(--mono);
-  font-size: .65rem;
-  color: var(--ink-3);
-  letter-spacing: .12em;
-  text-transform: uppercase;
-  font-weight: 400;
-  margin-bottom: .2rem;
-}
-
-/* ─── BUTTONS ────────────────────────────────────── */
-.btn {
-  display: inline-flex;
-  align-items: center;
-  gap: .5rem;
-  padding: .5rem 1.1rem;
-  border-radius: var(--radius);
-  font-family: var(--mono);
-  font-size: .72rem;
-  letter-spacing: .06em;
-  border: 1px solid transparent;
-  transition: all var(--transition);
-  white-space: nowrap;
-  font-weight: 500;
-}
-.btn-primary {
-  background: var(--bamboo);
-  color: #fff;
-  border-color: var(--bamboo-dk);
-}
-.btn-primary:hover { background: var(--bamboo-dk); }
-.btn-ghost {
-  background: var(--surface);
-  color: var(--ink-2);
-  border-color: var(--border);
-}
-.btn-ghost:hover { border-color: var(--bamboo); color: var(--bamboo-dk); }
-.btn-danger {
-  background: var(--danger-lt);
-  color: var(--danger);
-  border-color: #d4a0a0;
-}
-.btn-danger:hover { background: var(--danger); color: #fff; }
-.btn-sm { padding: .3rem .75rem; font-size: .67rem; }
-.btn-icon {
-  width: 32px; height: 32px;
-  padding: 0;
-  border-radius: var(--radius);
-  justify-content: center;
-}
-
-/* ─── MIC BUTTON ─────────────────────────────────── */
-.mic-btn {
-  width: 44px; height: 44px;
-  border-radius: 50%;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  display: flex; align-items: center; justify-content: center;
-  cursor: pointer;
-  transition: all var(--transition);
-  flex-shrink: 0;
-  position: relative;
-}
-.mic-btn:hover:not(:disabled) { border-color: var(--bamboo); background: var(--bamboo-lt); }
-.mic-btn.listening {
-  border-color: var(--bamboo);
-  background: var(--bamboo-lt);
-}
-.mic-btn.listening::after {
-  content: '';
-  position: absolute;
-  inset: -4px;
-  border-radius: 50%;
-  border: 2px solid var(--bamboo);
-  animation: pulse-ring 1.2s ease-out infinite;
-}
-.mic-btn:disabled {
-  opacity: .4; cursor: not-allowed;
-}
-.mic-btn svg { width: 18px; height: 18px; }
-@keyframes pulse-ring {
-  0%   { transform: scale(1); opacity: .6; }
-  100% { transform: scale(1.5); opacity: 0; }
-}
-.voice-status {
-  font-family: var(--mono);
-  font-size: .68rem;
-  color: var(--bamboo);
-  letter-spacing: .06em;
-  min-height: 1rem;
-  transition: opacity var(--transition);
-}
-
-/* ─── FORMS ──────────────────────────────────────── */
-.form-card {
-  background: var(--surface);
-  border: 1px solid var(--border-soft);
-  border-radius: var(--radius-lg);
-  padding: 1.5rem;
-  margin-bottom: 1.5rem;
-  box-shadow: var(--shadow);
-}
-.form-card h3 {
-  font-family: var(--serif);
-  font-size: 1rem;
-  margin-bottom: 1.2rem;
-  color: var(--ink);
-  display: flex;
-  align-items: center;
-  gap: .5rem;
-}
-.form-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-  gap: .75rem;
-  margin-bottom: 1rem;
-}
-.form-group { display: flex; flex-direction: column; gap: .3rem; }
-.form-group label {
-  font-family: var(--mono);
-  font-size: .65rem;
-  letter-spacing: .1em;
-  text-transform: uppercase;
-  color: var(--ink-3);
-}
-.form-group input,
-.form-group select,
-.form-group textarea {
-  background: var(--bg);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: .5rem .75rem;
-  font-size: .85rem;
-  color: var(--ink);
-  transition: border-color var(--transition);
-  width: 100%;
-}
-.form-group input:focus,
-.form-group select:focus,
-.form-group textarea:focus {
-  outline: none;
-  border-color: var(--bamboo);
-  box-shadow: 0 0 0 3px rgba(92,122,74,.12);
-}
-.form-group textarea { resize: vertical; min-height: 80px; }
-.form-row {
-  display: flex;
-  gap: .75rem;
-  align-items: flex-end;
-  flex-wrap: wrap;
-}
-.form-row .form-group { flex: 1; min-width: 140px; }
-
-/* ─── INPUT WITH MIC ─────────────────────────────── */
-.input-mic-wrap {
-  display: flex;
-  gap: .5rem;
-  align-items: center;
-}
-.input-mic-wrap input { flex: 1; }
-
-/* ─── TABLE ──────────────────────────────────────── */
-.data-table-wrap {
-  background: var(--surface);
-  border: 1px solid var(--border-soft);
-  border-radius: var(--radius-lg);
-  overflow: hidden;
-  box-shadow: var(--shadow);
-}
-.data-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: .82rem;
-}
-.data-table thead th {
-  background: #eeeae3;
-  font-family: var(--mono);
-  font-size: .62rem;
-  letter-spacing: .12em;
-  text-transform: uppercase;
-  color: var(--ink-3);
-  padding: .6rem 1rem;
-  text-align: left;
-  border-bottom: 1px solid var(--border);
-  font-weight: 500;
-}
-.data-table tbody tr {
-  border-bottom: 1px solid var(--border-soft);
-  transition: background var(--transition);
-}
-.data-table tbody tr:last-child { border-bottom: none; }
-.data-table tbody tr:hover { background: #f5f2ed; }
-.data-table td {
-  padding: .7rem 1rem;
-  color: var(--ink-2);
-  vertical-align: middle;
-}
-.data-table td.name { color: var(--ink); font-weight: 500; }
-.data-table .qty-cell {
-  font-family: var(--mono);
-  font-weight: 500;
-  color: var(--ink);
-}
-.data-table .price-cell {
-  font-family: var(--mono);
-  color: var(--slate);
-}
-.row-low td { background: var(--warn-lt) !important; }
-.row-low td.name { color: var(--warn) !important; }
-.row-out td { background: var(--danger-lt) !important; }
-
-/* ─── BADGES ─────────────────────────────────────── */
-.badge {
-  display: inline-flex;
-  align-items: center;
-  gap: .25rem;
-  padding: .2rem .55rem;
-  border-radius: 100px;
-  font-family: var(--mono);
-  font-size: .62rem;
-  letter-spacing: .06em;
-  font-weight: 500;
-}
-.badge-green  { background: var(--bamboo-lt); color: var(--bamboo-dk); }
-.badge-warn   { background: var(--warn-lt);   color: var(--warn);      }
-.badge-danger { background: var(--danger-lt); color: var(--danger);    }
-.badge-neutral{ background: var(--border-soft);color: var(--ink-3);   }
-
-/* ─── SUMMARY CARDS ──────────────────────────────── */
-.summary-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 1rem;
-  margin-bottom: 1.5rem;
-}
-.summary-card {
-  background: var(--surface);
-  border: 1px solid var(--border-soft);
-  border-radius: var(--radius-lg);
-  padding: 1.2rem 1.4rem;
-  box-shadow: var(--shadow);
-}
-.summary-card .label {
-  font-family: var(--mono);
-  font-size: .62rem;
-  letter-spacing: .12em;
-  text-transform: uppercase;
-  color: var(--ink-3);
-  margin-bottom: .4rem;
-}
-.summary-card .value {
-  font-family: var(--serif);
-  font-size: 1.8rem;
-  font-weight: 700;
-  color: var(--ink);
-  line-height: 1;
-}
-.summary-card .value.warn { color: var(--warn); }
-.summary-card .value.green { color: var(--bamboo); }
-.summary-card .sub {
-  font-family: var(--mono);
-  font-size: .68rem;
-  color: var(--ink-3);
-  margin-top: .3rem;
-}
-
-/* ─── SHOPPING LIST ──────────────────────────────── */
-.shopping-item {
-  display: flex;
-  align-items: center;
-  gap: .75rem;
-  padding: .7rem 1rem;
-  border-bottom: 1px solid var(--border-soft);
-  background: var(--surface);
-  transition: background var(--transition);
-}
-.shopping-item:last-child { border-bottom: none; }
-.shopping-item:hover { background: #f5f2ed; }
-.shopping-item input[type="checkbox"] {
-  width: 18px; height: 18px;
-  accent-color: var(--bamboo);
-  cursor: pointer;
-  flex-shrink: 0;
-}
-.shopping-item .item-name { flex: 1; font-weight: 500; color: var(--ink); }
-.shopping-item .item-qty  {
-  font-family: var(--mono);
-  font-size: .78rem;
-  color: var(--ink-2);
-  min-width: 70px;
-  text-align: right;
-}
-.shopping-item .item-price {
-  font-family: var(--mono);
-  font-size: .78rem;
-  color: var(--slate);
-  min-width: 70px;
-  text-align: right;
-}
-.shopping-item.checked .item-name {
-  text-decoration: line-through;
-  color: var(--ink-3);
-}
-.shopping-total {
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-  gap: 1rem;
-  padding: 1rem 1.2rem;
-  background: #eeeae3;
-  border-top: 1px solid var(--border);
-  font-family: var(--mono);
-  font-size: .78rem;
-  color: var(--ink-3);
-}
-.shopping-total strong {
-  font-size: 1.15rem;
-  color: var(--ink);
-  font-weight: 600;
-}
-
-/* ─── RECIPES ────────────────────────────────────── */
-.recipe-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 1.2rem;
-  margin-bottom: 1.5rem;
-}
-.recipe-card {
-  background: var(--surface);
-  border: 1px solid var(--border-soft);
-  border-radius: var(--radius-lg);
-  overflow: hidden;
-  box-shadow: var(--shadow);
-  transition: box-shadow var(--transition), transform var(--transition);
-  cursor: pointer;
-}
-.recipe-card:hover { box-shadow: var(--shadow-lg); transform: translateY(-2px); }
-.recipe-card-header {
-  padding: 1.1rem 1.3rem .7rem;
-  border-bottom: 1px solid var(--border-soft);
-}
-.recipe-card h4 {
-  font-family: var(--serif);
-  font-size: 1.05rem;
-  font-weight: 700;
-  margin-bottom: .35rem;
-}
-.recipe-card-meta {
-  display: flex;
-  gap: .5rem;
-  flex-wrap: wrap;
-  margin-top: .5rem;
-}
-.recipe-card-body {
-  padding: .9rem 1.3rem;
-}
-.recipe-card-body .ingredient-preview {
-  font-size: .78rem;
-  color: var(--ink-3);
-  line-height: 1.8;
-}
-.recipe-card-footer {
-  padding: .7rem 1.3rem;
-  background: #f5f2ed;
-  border-top: 1px solid var(--border-soft);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-.recipe-cost {
-  font-family: var(--mono);
-  font-size: .82rem;
-  color: var(--slate);
-}
-.recipe-cost span {
-  font-size: 1rem;
-  font-weight: 600;
-  color: var(--ink);
-}
-
-/* ─── MODAL ──────────────────────────────────────── */
-.modal-overlay {
-  display: none;
-  position: fixed;
-  inset: 0;
-  background: rgba(26,24,20,.45);
-  z-index: 200;
-  align-items: center;
-  justify-content: center;
-  padding: 1rem;
-}
-.modal-overlay.open { display: flex; }
-.modal {
-  background: var(--surface);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-lg);
-  width: 100%;
-  max-width: 560px;
-  max-height: 90vh;
-  overflow-y: auto;
-  animation: modal-in .18s cubic-bezier(.4,0,.2,1);
-}
-@keyframes modal-in {
-  from { opacity: 0; transform: scale(.96) translateY(8px); }
-  to   { opacity: 1; transform: none; }
-}
-.modal-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 1.2rem 1.5rem;
-  border-bottom: 1px solid var(--border-soft);
-}
-.modal-header h3 {
-  font-family: var(--serif);
-  font-size: 1.1rem;
-  font-weight: 700;
-}
-.modal-body { padding: 1.5rem; }
-.modal-footer {
-  display: flex;
-  justify-content: flex-end;
-  gap: .75rem;
-  padding: 1rem 1.5rem;
-  border-top: 1px solid var(--border-soft);
-}
-
-/* ─── ALERTS ─────────────────────────────────────── */
-.alert-bar {
-  padding: .65rem 1rem;
-  border-radius: var(--radius);
-  font-family: var(--mono);
-  font-size: .72rem;
-  letter-spacing: .04em;
-  margin-bottom: .75rem;
-  display: flex;
-  align-items: center;
-  gap: .5rem;
-}
-.alert-warn  { background: var(--warn-lt);   color: var(--warn);   border: 1px solid #e0c068; }
-.alert-green { background: var(--bamboo-lt); color: var(--bamboo-dk); border: 1px solid #b0c8a0; }
-
-/* ─── INLINE EDIT ────────────────────────────────── */
-.inline-edit-qty {
-  font-family: var(--mono);
-  font-size: .82rem;
-  width: 70px;
-  padding: .2rem .4rem;
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  background: var(--bg);
-  color: var(--ink);
-  text-align: center;
-}
-.inline-edit-qty:focus {
-  outline: none;
-  border-color: var(--bamboo);
-}
-
-/* ─── EMPTY STATE ────────────────────────────────── */
-.empty-state {
-  text-align: center;
-  padding: 4rem 2rem;
-  color: var(--ink-3);
-}
-.empty-state .icon {
-  font-size: 2.5rem;
-  margin-bottom: 1rem;
-  opacity: .5;
-}
-.empty-state p {
-  font-family: var(--mono);
-  font-size: .78rem;
-  letter-spacing: .06em;
-}
-
-/* ─── FILTER STRIP ───────────────────────────────── */
-.filter-strip {
-  display: flex;
-  gap: .5rem;
-  flex-wrap: wrap;
-  margin-bottom: 1rem;
-  align-items: center;
-}
-.filter-strip input[type="text"],
-.filter-strip select {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: .4rem .75rem;
-  font-family: var(--mono);
-  font-size: .72rem;
-  color: var(--ink);
-  transition: border-color var(--transition);
-}
-.filter-strip input[type="text"]:focus,
-.filter-strip select:focus {
-  outline: none; border-color: var(--bamboo);
-}
-
-/* ─── CATEGORY TAG ───────────────────────────────── */
-.cat-dot {
-  display: inline-block;
-  width: 8px; height: 8px;
-  border-radius: 50%;
-  margin-right: .3rem;
-  flex-shrink: 0;
-}
-.cat-produce   { background: #6a9c5a; }
-.cat-dairy     { background: #7a9eb8; }
-.cat-protein   { background: #b87a5a; }
-.cat-grain     { background: #c8a860; }
-.cat-pantry    { background: #9a7ab8; }
-.cat-frozen    { background: #5a9aaa; }
-/* NEW HOUSEHOLD CATEGORIES */
-.cat-cleaning  { background: #4a8a9a; }
-.cat-laundry   { background: #6a7ab8; }
-.cat-household { background: #b89a6a; }
-.cat-personal  { background: #b86a8a; }
-.cat-other     { background: #9a9a9a; }
-
-/* ─── RECIPE DETAIL VIEW ─────────────────────────── */
-.recipe-detail {
-  display: none;
-}
-.recipe-detail.active { display: block; }
-.recipe-detail-header {
-  background: var(--surface);
-  border: 1px solid var(--border-soft);
-  border-radius: var(--radius-lg);
-  padding: 1.5rem;
-  margin-bottom: 1.2rem;
-  box-shadow: var(--shadow);
-}
-.recipe-detail-header h2 {
-  font-family: var(--serif);
-  font-size: 1.6rem;
-  font-weight: 700;
-  margin-bottom: .5rem;
-}
-.recipe-ingredient-list {
-  list-style: none;
-  background: var(--surface);
-  border: 1px solid var(--border-soft);
-  border-radius: var(--radius-lg);
-  overflow: hidden;
-  margin-bottom: 1.2rem;
-}
-.recipe-ingredient-list li {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: .7rem 1.2rem;
-  border-bottom: 1px solid var(--border-soft);
-  font-size: .85rem;
-}
-.recipe-ingredient-list li:last-child { border-bottom: none; }
-.recipe-instructions {
-  background: var(--surface);
-  border: 1px solid var(--border-soft);
-  border-radius: var(--radius-lg);
-  padding: 1.5rem;
-  box-shadow: var(--shadow);
-  margin-bottom: 1.2rem;
-  white-space: pre-wrap;
-  font-size: .88rem;
-  line-height: 1.8;
-  color: var(--ink-2);
-}
-
-/* ─── DIVIDER ────────────────────────────────────── */
-.divider {
-  border: none;
-  border-top: 1px solid var(--border-soft);
-  margin: 1.5rem 0;
-}
-
-/* ─── TOAST ──────────────────────────────────────── */
-#toast-container {
-  position: fixed;
-  bottom: 1.5rem;
-  right: 1.5rem;
-  z-index: 999;
-  display: flex;
-  flex-direction: column;
-  gap: .5rem;
-  pointer-events: none;
-}
-.toast {
-  background: var(--ink);
-  color: #f5f2ee;
-  border-radius: var(--radius);
-  padding: .65rem 1.1rem;
-  font-family: var(--mono);
-  font-size: .72rem;
-  letter-spacing: .04em;
-  box-shadow: var(--shadow-lg);
-  animation: toast-in .2s ease;
-  max-width: 280px;
-}
-.toast.success { background: var(--bamboo-dk); }
-.toast.warn    { background: var(--warn); }
-@keyframes toast-in {
-  from { opacity: 0; transform: translateX(12px); }
-  to   { opacity: 1; transform: none; }
-}
-
-/* ─── PRINT STYLES ───────────────────────────────── */
-@media print {
-  body { background: #fff !important; font-size: 11pt; }
-  .app-header, .app-nav, .form-card,
-  .btn, .mic-btn, .filter-strip,
-  .section-header > div,
-  #toast-container { display: none !important; }
-  .view:not(.active) { display: none !important; }
-  .data-table-wrap { box-shadow: none; border: 1px solid #ccc; }
-  .data-table thead th { background: #eee !important; }
-  .shopping-item input[type="checkbox"] {
-    -webkit-print-color-adjust: exact;
-    print-color-adjust: exact;
-  }
-  .recipe-detail { display: block !important; }
-  .recipe-grid { display: none !important; }
-  .section-header { border-bottom: 2px solid #000; }
-  .section-title { font-size: 16pt; }
-  a::after { content: none; }
-}
-
-/* ─── SCROLLBAR ──────────────────────────────────── */
-::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar { width: 5px; height: 5px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--ink-3); }
 
-/* ─── RESPONSIVE ─────────────────────────────────── */
+/* ══ TOP MASTHEAD ═══════════════════════════════════════════════ */
+.masthead {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 0 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 52px;
+  position: sticky;
+  top: 0;
+  z-index: 200;
+}
+.masthead-brand { display: flex; align-items: baseline; gap: .7rem; }
+.masthead-brand .hq { font-family: var(--sans); font-size: 1.1rem; font-weight: 800; letter-spacing: .04em; color: var(--grove); }
+.masthead-brand .tagline { font-family: var(--mono); font-size: .6rem; color: var(--ink-3); letter-spacing: .15em; text-transform: uppercase; }
+.masthead-right { display: flex; align-items: center; gap: 1rem; }
+.status-pill { display: flex; align-items: center; gap: .4rem; font-family: var(--mono); font-size: .6rem; color: var(--ink-3); letter-spacing: .08em; }
+.status-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--grove); }
+.status-dot.offline { background: var(--amber); }
+.masthead-balance { font-family: var(--mono); font-size: .75rem; color: var(--ink-2); display: flex; align-items: center; gap: .4rem; }
+.masthead-balance .amt { font-weight: 500; color: var(--fin-income); }
+.masthead-balance .amt.neg { color: var(--fin-spend); }
+
+/* ══ PRIMARY NAV ════════════════════════════════════════════════ */
+.primary-nav {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  padding: 0 1.5rem;
+  overflow-x: auto;
+  position: sticky;
+  top: 52px;
+  z-index: 190;
+}
+.pnav-btn {
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  padding: 1rem 1.2rem;
+  font-family: var(--mono);
+  font-size: .7rem;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  white-space: nowrap;
+  transition: all var(--transition);
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+}
+.pnav-btn:hover { color: var(--ink); background: var(--surface); }
+.pnav-btn.active {
+  color: var(--grove);
+  border-bottom-color: var(--grove);
+  font-weight: 600;
+  background: linear-gradient(to top, var(--grove-lt) 0%, transparent 100%);
+}
+.pnav-btn .mod-tag { font-size: .55rem; background: var(--border); border-radius: 3px; padding: .1rem .3rem; color: var(--ink-3); }
+.pnav-btn.active .mod-tag { background: transparent; color: var(--grove); }
+.nav-badge { display: inline-flex; align-items: center; justify-content: center; background: var(--amber); color: var(--bg); width: 15px; height: 15px; border-radius: 50%; font-size: .58rem; margin-left: .2rem; font-weight: 700; }
+.nav-badge.fin { background: var(--fin-spend); color: #fff; }
+
+/* ══ MAIN CONTENT AREA ══════════════════════════════════════════ */
+.app-main { flex: 1; padding: 1.5rem; max-width: 1200px; margin: 0 auto; width: 100%; }
+.view { display: none; }
+.view.active { display: block; animation: fadeView .2s ease; }
+@keyframes fadeView { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+
+/* ══ SECTION HEADER ══════════════════════════════════════════════ */
+.section-header { display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid var(--border-soft); gap: 1rem; flex-wrap: wrap; }
+.section-title { font-family: var(--serif); font-size: 1.4rem; font-weight: 700; color: var(--ink); letter-spacing: .02em; line-height: 1.1; }
+.section-title small { display: block; font-family: var(--mono); font-size: .58rem; color: var(--mod-accent); letter-spacing: .14em; text-transform: uppercase; font-weight: 600; margin-bottom: .2rem; }
+
+/* ══ BUTTONS ══════════════════════════════════════════════════════ */
+.btn { display: inline-flex; align-items: center; gap: .4rem; padding: .45rem 1rem; border-radius: var(--r); font-family: var(--mono); font-size: .68rem; letter-spacing: .06em; border: 1px solid transparent; transition: all var(--transition); white-space: nowrap; font-weight: 500; }
+.btn-primary { background: var(--mod-accent); color: #fff; border-color: var(--mod-accent); }
+.btn-primary:hover { filter: brightness(1.2); }
+.btn-ghost { background: var(--surface-2); color: var(--ink-2); border-color: var(--border-soft); }
+.btn-ghost:hover { border-color: var(--mod-accent); color: var(--mod-accent); }
+.btn-danger { background: var(--rose-lt); color: var(--rose); border-color: #5a2020; }
+.btn-danger:hover { background: var(--rose); color: #fff; }
+.btn-fin { background: var(--sky-lt); color: var(--sky); border-color: #1a3050; }
+.btn-fin:hover { background: var(--sky); color: #fff; }
+.btn-sm { padding: .3rem .7rem; font-size: .62rem; }
+.btn-icon { width: 30px; height: 30px; padding: 0; justify-content: center; border-radius: var(--r); }
+
+/* ══ FORMS & CARDS ════════════════════════════════════════════════ */
+/* NOTE: Cards now use dynamic accent borders based on their module */
+.card, .form-card {
+  background: var(--surface);
+  border: 1px solid var(--border-soft);
+  border-top: 3px solid var(--mod-accent);
+  border-radius: var(--r-lg);
+  padding: 1.5rem;
+  margin-bottom: 1.25rem;
+  box-shadow: var(--shadow);
+}
+.form-card h3 { font-family: var(--serif); font-size: .95rem; margin-bottom: 1rem; color: var(--ink); display: flex; align-items: center; gap: .5rem; }
+.form-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: .65rem; margin-bottom: .9rem; }
+.form-group { display: flex; flex-direction: column; gap: .28rem; }
+.form-group label { font-family: var(--mono); font-size: .6rem; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-3); }
+.form-group input, .form-group select, .form-group textarea {
+  background: var(--bg-2); border: 1px solid var(--border); border-radius: var(--r);
+  padding: .6rem .8rem; font-size: .82rem; color: var(--ink); transition: border-color var(--transition); width: 100%;
+}
+.form-group input:focus, .form-group select:focus, .form-group textarea:focus { outline: none; border-color: var(--mod-accent); }
+.form-group input::placeholder { color: var(--ink-4); }
+.form-group textarea { resize: vertical; min-height: 72px; }
+.form-row { display: flex; gap: .65rem; align-items: flex-end; flex-wrap: wrap; }
+.form-row .form-group { flex: 1; min-width: 130px; }
+.input-mic-wrap { display: flex; gap: .4rem; align-items: center; }
+.input-mic-wrap input { flex: 1; }
+
+/* ══ TABLES ═════════════════════════════════════════════════════ */
+.data-table-wrap {
+  background: var(--surface);
+  border: 1px solid var(--border-soft);
+  border-top: 3px solid var(--mod-accent);
+  border-radius: var(--r-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow);
+}
+.data-table { width: 100%; border-collapse: collapse; font-size: .8rem; }
+.data-table thead th {
+  background: var(--surface-2);
+  font-family: var(--mono); font-size: .58rem; letter-spacing: .12em; text-transform: uppercase;
+  color: var(--ink-3); padding: 1rem 1.2rem; text-align: left; border-bottom: 1px solid var(--border); font-weight: 500;
+}
+.data-table tbody tr { border-bottom: 1px solid var(--border-soft); transition: background var(--transition); }
+.data-table tbody tr:last-child { border-bottom: none; }
+.data-table tbody tr:hover { background: var(--surface-2); }
+.data-table td { padding: 1rem 1.2rem; color: var(--ink-2); vertical-align: middle; }
+.data-table td.name { color: var(--ink); font-weight: 500; }
+.data-table .qty-cell, .data-table .price-cell { font-family: var(--mono); color: var(--ink); }
+.row-low td { background: rgba(212,163,50,.06) !important; }
+.row-low td.name { color: var(--amber) !important; }
+.row-out td { background: rgba(192,80,74,.06) !important; }
+
+/* ══ BADGES ══════════════════════════════════════════════════════ */
+.badge { display: inline-flex; align-items: center; gap: .22rem; padding: .18rem .5rem; border-radius: 100px; font-family: var(--mono); font-size: .58rem; letter-spacing: .05em; font-weight: 500; }
+.badge-green  { background: var(--grove-lt); color: var(--grove); }
+.badge-warn   { background: var(--amber-lt); color: var(--amber); }
+.badge-danger { background: var(--rose-lt); color: var(--rose); }
+.badge-neutral { background: var(--border); color: var(--ink-3); }
+.badge-sky    { background: var(--sky-lt); color: var(--sky); }
+
+/* ══ SUMMARY CARDS ═══════════════════════════════════════════════ */
+.summary-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: .9rem; margin-bottom: 1.25rem; }
+.summary-card {
+  background: var(--surface); border: 1px solid var(--border-soft); border-top: 3px solid var(--mod-accent);
+  border-radius: var(--r-lg); padding: 1.25rem 1.4rem; box-shadow: var(--shadow); position: relative; overflow: hidden;
+}
+.summary-card .label { font-family: var(--mono); font-size: .58rem; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-3); margin-bottom: .35rem; }
+.summary-card .value { font-family: var(--serif); font-size: 1.7rem; font-weight: 700; color: var(--ink); line-height: 1; }
+.summary-card .value.grove { color: var(--grove); }
+.summary-card .value.warn { color: var(--amber); }
+.summary-card .value.danger { color: var(--rose); }
+.summary-card .sub { font-family: var(--mono); font-size: .62rem; color: var(--ink-3); margin-top: .28rem; }
+
+/* ══ SHOPPING LIST STYLES ════════════════════════════════════════ */
+.shopping-item {
+  display: flex; align-items: center; gap: .7rem; padding: .85rem 1rem; border-bottom: 1px solid var(--border-soft);
+  background: var(--surface); transition: background var(--transition);
+}
+.shopping-item:last-child { border-bottom: none; }
+.shopping-item:hover { background: var(--surface-2); }
+.shopping-item input[type="checkbox"] { width: 16px; height: 16px; accent-color: var(--mod-accent); cursor: pointer; flex-shrink: 0; }
+.shopping-item .item-name { flex: 1; font-weight: 500; color: var(--ink); font-size: .82rem; }
+.shopping-item .item-qty { font-family: var(--mono); font-size: .72rem; color: var(--ink-2); min-width: 64px; text-align: right; }
+.shopping-item .item-price { font-family: var(--mono); font-size: .72rem; color: var(--sky); min-width: 64px; text-align: right; }
+.shopping-item.checked .item-name { text-decoration: line-through; color: var(--ink-3); }
+.shopping-total { display: flex; justify-content: flex-end; align-items: center; gap: .9rem; padding: .85rem 1.1rem; background: var(--surface-2); border-top: 1px solid var(--border); font-family: var(--mono); font-size: .72rem; color: var(--ink-3); }
+.shopping-total strong { font-size: 1.1rem; color: var(--ink); }
+
+/* ══ RECIPE CARDS ════════════════════════════════════════════════ */
+.recipe-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(270px, 1fr)); gap: 1.1rem; margin-bottom: 1.25rem; }
+.recipe-card {
+  background: var(--surface); border: 1px solid var(--border-soft); border-top: 3px solid var(--mod-accent);
+  border-radius: var(--r-lg); overflow: hidden; box-shadow: var(--shadow);
+  transition: box-shadow var(--transition), transform var(--transition), filter var(--transition);
+  cursor: pointer;
+}
+.recipe-card:hover { box-shadow: var(--shadow-lg); filter: brightness(1.1); transform: translateY(-2px); }
+.recipe-card-header { padding: 1rem 1.2rem .65rem; border-bottom: 1px solid var(--border-soft); }
+.recipe-card h4 { font-family: var(--serif); font-size: 1rem; font-weight: 700; margin-bottom: .3rem; }
+.recipe-card-meta { display: flex; gap: .4rem; flex-wrap: wrap; margin-top: .4rem; }
+.recipe-card-body { padding: .8rem 1.2rem; }
+.recipe-card-body .ingredient-preview { font-size: .72rem; color: var(--ink-3); line-height: 1.7; font-family: var(--mono); }
+.recipe-card-footer { padding: .65rem 1.2rem; background: var(--surface-2); border-top: 1px solid var(--border-soft); display: flex; justify-content: space-between; align-items: center; }
+.recipe-cost { font-family: var(--mono); font-size: .75rem; color: var(--ink-3); }
+.recipe-cost span { font-size: .92rem; font-weight: 600; color: var(--ink); }
+
+/* ══ RECIPE DETAIL ══════════════════════════════════════════════ */
+.recipe-detail { display: none; }
+.recipe-detail.active { display: block; }
+.recipe-detail-header { background: var(--surface); border: 1px solid var(--border-soft); border-top: 3px solid var(--mod-accent); border-radius: var(--r-lg); padding: 1.4rem; margin-bottom: 1.1rem; box-shadow: var(--shadow); }
+.recipe-detail-header h2 { font-family: var(--serif); font-size: 1.5rem; font-weight: 700; margin-bottom: .4rem; }
+.recipe-ingredient-list { list-style: none; background: var(--surface); border: 1px solid var(--border-soft); border-top: 3px solid var(--border); border-radius: var(--r-lg); overflow: hidden; margin-bottom: 1.1rem; }
+.recipe-ingredient-list li { display: flex; align-items: center; justify-content: space-between; padding: .85rem 1.1rem; border-bottom: 1px solid var(--border-soft); font-size: .8rem; }
+.recipe-ingredient-list li:last-child { border-bottom: none; }
+.recipe-instructions { background: var(--surface); border: 1px solid var(--border-soft); border-top: 3px solid var(--border); border-radius: var(--r-lg); padding: 1.4rem; box-shadow: var(--shadow); margin-bottom: 1.1rem; white-space: pre-wrap; font-size: .82rem; line-height: 1.85; color: var(--ink-2); }
+
+/* ══ MODAL ══════════════════════════════════════════════════════ */
+.modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.65); z-index: 300; align-items: center; justify-content: center; padding: 1rem; backdrop-filter: blur(4px); }
+.modal-overlay.open { display: flex; }
+.modal { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-xl); box-shadow: var(--shadow-lg); width: 100%; max-width: 540px; max-height: 90vh; overflow-y: auto; animation: modal-in .2s cubic-bezier(.4,0,.2,1); }
+@keyframes modal-in { from { opacity: 0; transform: scale(.95) translateY(10px); } to { opacity: 1; transform: none; } }
+.modal-header { display: flex; align-items: center; justify-content: space-between; padding: 1.1rem 1.4rem; border-bottom: 1px solid var(--border-soft); }
+.modal-header h3 { font-family: var(--serif); font-size: 1.05rem; font-weight: 700; }
+.modal-body { padding: 1.4rem; }
+.modal-footer { display: flex; justify-content: flex-end; gap: .6rem; padding: .9rem 1.4rem; border-top: 1px solid var(--border-soft); }
+
+/* ══ FILTER STRIP ════════════════════════════════════════════════ */
+.filter-strip { display: flex; gap: .5rem; flex-wrap: wrap; margin-bottom: .9rem; align-items: center; }
+.filter-strip input[type="text"], .filter-strip select { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); padding: .6rem .8rem; font-family: var(--mono); font-size: .68rem; color: var(--ink); transition: border-color var(--transition); }
+.filter-strip input[type="text"]:focus, .filter-strip select:focus { outline: none; border-color: var(--mod-accent); }
+
+/* ══ CATEGORY DOT ════════════════════════════════════════════════ */
+.cat-dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; margin-right: .3rem; flex-shrink: 0; }
+.cat-produce { background: #5a9a4a; } .cat-dairy { background: #5a8ab8; }
+.cat-protein { background: #b87a5a; } .cat-grain { background: #c8a860; }
+.cat-pantry { background: #8a6ab8; } .cat-frozen { background: #4a8a9a; }
+.cat-cleaning { background: #3a7a8a; } .cat-laundry { background: #5a6ab8; }
+.cat-household { background: #a88a5a; } .cat-personal { background: #a85a7a; }
+.cat-other { background: #6a6a6a; }
+
+/* ══ ALERTS ══════════════════════════════════════════════════════ */
+.alert-bar { padding: .6rem .9rem; border-radius: var(--r); font-family: var(--mono); font-size: .68rem; letter-spacing: .04em; margin-bottom: .7rem; display: flex; align-items: center; gap: .5rem; }
+.alert-warn  { background: var(--amber-lt); color: var(--amber); border: 1px solid #4a3a10; }
+.alert-green { background: var(--grove-lt); color: var(--grove); border: 1px solid #1a3a22; }
+
+/* ══ VOICE ════════════════════════════════════════════════════ */
+.mic-btn { width: 38px; height: 38px; border-radius: 50%; background: var(--surface-2); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all var(--transition); flex-shrink: 0; position: relative; }
+.mic-btn:hover:not(:disabled) { border-color: var(--mod-accent); background: var(--surface); }
+.mic-btn.listening { border-color: var(--mod-accent); background: var(--surface); }
+.mic-btn.listening::after { content: ''; position: absolute; inset: -4px; border-radius: 50%; border: 2px solid var(--mod-accent); animation: pulse-ring 1.2s ease-out infinite; }
+.mic-btn:disabled { opacity: .4; cursor: not-allowed; }
+.mic-btn svg { width: 16px; height: 16px; color: var(--ink-2); }
+@keyframes pulse-ring { 0% { transform: scale(1); opacity: .6; } 100% { transform: scale(1.5); opacity: 0; } }
+.voice-status { font-family: var(--mono); font-size: .62rem; color: var(--mod-accent); letter-spacing: .05em; min-height: .9rem; }
+
+/* ══ EMPTY STATE ═════════════════════════════════════════════════ */
+.empty-state { text-align: center; padding: 3.5rem 2rem; color: var(--ink-3); }
+.empty-state .icon { font-size: 2rem; margin-bottom: .9rem; opacity: .4; }
+.empty-state p { font-family: var(--mono); font-size: .72rem; letter-spacing: .06em; }
+
+/* ══ INLINE SYNC BANNER ══════════════════════════════════════════ */
+.sync-banner { background: linear-gradient(135deg, var(--sky-lt) 0%, var(--grove-lt) 100%); border: 1px solid #1a3040; border-radius: var(--r-lg); padding: .9rem 1.2rem; margin-bottom: 1.25rem; display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap; }
+.sync-banner .label { font-family: var(--mono); font-size: .65rem; letter-spacing: .1em; text-transform: uppercase; color: var(--sky); margin-bottom: .2rem; }
+.sync-banner .desc { font-size: .8rem; color: var(--ink-2); }
+
+/* ══ FINANCE SECTION SPECIFIC ════════════════════════════════════ */
+.fin-balance-card { background: var(--surface); border: 1px solid var(--border-soft); border-top: 3px solid var(--mod-accent); border-radius: var(--r-xl); padding: 1.8rem; text-align: center; margin-bottom: 1.25rem; box-shadow: var(--shadow-lg); position: relative; overflow: hidden; }
+.fin-balance-card .label { font-family: var(--mono); font-size: .62rem; letter-spacing: .14em; text-transform: uppercase; color: var(--ink-3); margin-bottom: .6rem; }
+.fin-balance-card .amount { font-family: var(--serif); font-size: 3.2rem; font-weight: 700; color: var(--fin-income); line-height: 1; margin-bottom: .5rem; }
+.fin-balance-card .amount.neg { color: var(--fin-spend); }
+.fin-balance-card .sub { font-family: var(--mono); font-size: .62rem; color: var(--ink-3); background: var(--bg); border: 1px solid var(--border-soft); display: inline-block; padding: .25rem .7rem; border-radius: 100px; }
+
+.fin-stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: .9rem; margin-bottom: 1.25rem; }
+.fin-stat-card { background: var(--surface); border: 1px solid var(--border-soft); border-top: 3px solid var(--mod-accent); border-radius: var(--r-lg); padding: 1.5rem; box-shadow: var(--shadow); }
+.fin-stat-card .label { font-family: var(--mono); font-size: .58rem; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-3); margin-bottom: .35rem; display: flex; align-items: center; gap: .4rem; }
+.fin-stat-card .amount { font-family: var(--serif); font-size: 1.5rem; font-weight: 700; }
+.fin-stat-card .note { font-family: var(--mono); font-size: .58rem; color: var(--ink-3); margin-top: .2rem; }
+
+.fin-unpaid-bar { background: var(--surface); border: 1px solid var(--border-soft); border-top: 3px solid var(--mod-accent); border-radius: var(--r-lg); padding: 1.4rem 1.5rem; display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.25rem; box-shadow: var(--shadow); }
+.fin-unpaid-bar.has-bills { border-color: #4a3a10; }
+.fin-unpaid-bar .left { display: flex; align-items: center; gap: .7rem; }
+.fin-unpaid-bar .icon { width: 36px; height: 36px; border-radius: 50%; background: var(--amber-lt); border: 1px solid #4a3a10; display: flex; align-items: center; justify-content: center; font-size: .9rem; }
+.fin-unpaid-bar .label { font-family: var(--mono); font-size: .6rem; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-3); margin-bottom: .15rem; }
+.fin-unpaid-bar .count { font-size: .75rem; color: var(--ink-2); }
+.fin-unpaid-bar .total { font-family: var(--serif); font-size: 1.4rem; font-weight: 700; color: var(--amber); }
+
+/* Ledger toggle */
+.ledger-toggle { display: flex; align-items: center; justify-content: space-between; margin-bottom: .75rem; padding: .4rem .5rem; cursor: pointer; border-radius: var(--r); transition: background var(--transition); }
+.ledger-toggle:hover { background: var(--surface-2); }
+.ledger-toggle .title { font-family: var(--mono); font-size: .62rem; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-3); }
+.ledger-chevron { transition: transform .3s ease; font-size: .7rem; color: var(--ink-3); }
+.ledger-chevron.open { transform: rotate(180deg); }
+
+.ledger-item { padding: 1.2rem 1.4rem; border-bottom: 1px solid var(--border-soft); transition: background var(--transition); }
+.ledger-item:last-child { border-bottom: none; }
+.ledger-item:hover { background: var(--surface-2); }
+.ledger-item .main-row { display: flex; align-items: center; justify-content: space-between; gap: .75rem; }
+.ledger-item .item-icon { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: .75rem; flex-shrink: 0; }
+.ledger-item .item-info { flex: 1; min-width: 0; }
+.ledger-item .item-name { font-weight: 600; font-size: .82rem; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ledger-item .item-meta { font-family: var(--mono); font-size: .6rem; color: var(--ink-3); margin-top: .12rem; display: flex; align-items: center; gap: .5rem; flex-wrap: wrap; }
+.ledger-item .item-amount { font-family: var(--mono); font-weight: 500; font-size: .88rem; flex-shrink: 0; }
+.ledger-item .actions { display: flex; justify-content: flex-end; gap: .25rem; margin-top: .35rem; }
+
+/* Finance log form */
+.fin-type-switch { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: .4rem; background: var(--bg-2); border: 1px solid var(--border); border-radius: var(--r-lg); padding: .35rem; margin-bottom: 1.25rem; }
+.fin-type-switch label { cursor: pointer; }
+.fin-type-switch input[type="radio"] { position: absolute; opacity: 0; width: 0; height: 0; }
+.fin-type-btn { text-align: center; padding: .65rem .5rem; border-radius: var(--r); font-family: var(--mono); font-size: .65rem; letter-spacing: .06em; text-transform: uppercase; color: var(--ink-3); transition: all var(--transition); display: flex; flex-direction: column; align-items: center; gap: .3rem; }
+.fin-type-switch input:checked + .fin-type-btn { background: var(--surface-2); border: 1px solid var(--mod-accent); }
+.fin-type-switch input[value="income"]:checked + .fin-type-btn { color: var(--fin-income); }
+.fin-type-switch input[value="spend"]:checked + .fin-type-btn { color: var(--fin-spend); }
+.fin-type-switch input[value="bill"]:checked + .fin-type-btn { color: var(--fin-bill); }
+
+.bill-toggle-row { background: var(--sky-lt); border: 1px solid #1a3050; border-radius: var(--r-lg); padding: .85rem 1rem; display: flex; align-items: center; justify-content: space-between; cursor: pointer; margin-bottom: .9rem; }
+.bill-toggle-row.unpaid { background: var(--rose-lt); border-color: #3a1a1a; }
+
+/* Shopping→Finance sync UI */
+.shop-to-fin { background: linear-gradient(135deg, var(--sky-lt), var(--grove-lt)); border: 1px solid #1a2e20; border-radius: var(--r-lg); padding: 1.2rem 1.4rem; margin-bottom: 1.25rem; display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap; }
+.shop-to-fin .info .cap { font-family: var(--mono); font-size: .58rem; letter-spacing: .12em; text-transform: uppercase; color: var(--sky); margin-bottom: .2rem; }
+.shop-to-fin .info .desc { font-size: .78rem; color: var(--ink-2); }
+.shop-to-fin .total-preview { font-family: var(--mono); font-size: 1.1rem; font-weight: 500; color: var(--ink); }
+
+/* Toast */
+#toast-container { position: fixed; bottom: 1.5rem; right: 1.5rem; z-index: 999; display: flex; flex-direction: column; gap: .4rem; pointer-events: none; }
+.toast { background: var(--surface); color: var(--ink); border: 1px solid var(--border); border-radius: var(--r); padding: .8rem 1.2rem; font-family: var(--mono); font-size: .68rem; letter-spacing: .04em; box-shadow: var(--shadow-lg); animation: toast-in .2s ease; max-width: 280px; }
+.toast.success { background: var(--grove-lt); border-color: var(--grove-dk); color: var(--grove); }
+.toast.warn { background: var(--amber-lt); border-color: #5a4010; color: var(--amber); }
+.toast.danger { background: var(--rose-lt); border-color: #5a2020; color: var(--rose); }
+@keyframes toast-in { from { opacity: 0; transform: translateX(10px); } to { opacity: 1; transform: none; } }
+
+/* Wipe confirm */
+.confirm-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.7); z-index: 400; align-items: center; justify-content: center; padding: 1rem; }
+.confirm-overlay.open { display: flex; }
+.confirm-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-xl); padding: 2rem; max-width: 360px; width: 100%; text-align: center; box-shadow: var(--shadow-lg); animation: modal-in .2s ease; }
+.confirm-card h3 { font-family: var(--serif); font-size: 1.2rem; margin-bottom: .5rem; }
+.confirm-card p { font-size: .8rem; color: var(--ink-2); margin-bottom: 1.5rem; line-height: 1.6; }
+
+/* Settings rows */
+.settings-item { display: flex; align-items: center; gap: .9rem; padding: 1.2rem 1.4rem; border-bottom: 1px solid var(--border-soft); transition: background var(--transition); cursor: pointer; }
+.settings-item:last-child { border-bottom: none; }
+.settings-item:hover { background: var(--surface-2); }
+.settings-item .sicon { width: 36px; height: 36px; border-radius: var(--r); display: flex; align-items: center; justify-content: center; font-size: 1rem; flex-shrink: 0; }
+.settings-item .stitle { font-weight: 600; font-size: .85rem; margin-bottom: .1rem; }
+.settings-item .sdesc { font-family: var(--mono); font-size: .62rem; color: var(--ink-3); }
+
+/* ══ PRINT ════════════════════════════════════════════════════════ */
+@media print {
+  .masthead, .primary-nav, .form-card, .btn, .mic-btn, .filter-strip, .section-header > div, #toast-container, .sync-banner, .shop-to-fin { display: none !important; }
+  .view:not(.active) { display: none !important; }
+  .data-table-wrap { box-shadow: none; border: 1px solid #ccc; }
+  body { background: #fff !important; color: #000 !important; }
+}
+
+/* ══ RESPONSIVE ══════════════════════════════════════════════════ */
 @media (max-width: 640px) {
   .app-main { padding: 1rem; }
-  .app-header { padding: 0 1rem; }
-  .app-nav { padding: 0 .5rem; }
-  .form-grid { grid-template-columns: 1fr 1fr; }
+  .masthead { padding: 0 1rem; }
+  .primary-nav { padding: 0 .5rem; }
   .summary-grid { grid-template-columns: 1fr 1fr; }
-  .data-table thead { display: none; }
-  .data-table tbody tr {
-    display: block;
-    padding: .5rem;
-    margin-bottom: .5rem;
-    border: 1px solid var(--border-soft);
-    border-radius: var(--radius);
-  }
-  .data-table td {
-    display: flex;
-    justify-content: space-between;
-    padding: .3rem .5rem;
-    font-size: .78rem;
-  }
-  .data-table td::before {
-    content: attr(data-label);
-    font-family: var(--mono);
-    font-size: .6rem;
-    letter-spacing: .08em;
-    text-transform: uppercase;
-    color: var(--ink-3);
-    font-weight: 500;
-  }
+  .fin-stats-grid { grid-template-columns: 1fr 1fr; }
   .recipe-grid { grid-template-columns: 1fr; }
+  .data-table thead { display: none; }
+  .data-table tbody tr { display: block; padding: .5rem; margin-bottom: .5rem; border: 1px solid var(--border-soft); border-radius: var(--r); }
+  .data-table td { display: flex; justify-content: space-between; padding: .3rem .5rem; font-size: .75rem; }
+  .data-table td::before { content: attr(data-label); font-family: var(--mono); font-size: .58rem; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-3); font-weight: 500; }
+  .masthead-balance { display: none; }
 }
 </style>
 </head>
 <body>
 
-<header class="app-header">
-  <div class="app-logo">
-    <span class="kanji">間食倉庫</span>
-    <span class="subtitle">Pantry Command</span>
+<header class="masthead">
+  <div class="masthead-brand">
+    <span class="hq">HQ</span>
+    <span class="tagline">Command Centre v2</span>
   </div>
-  <div class="status-pill">
-    <div class="status-dot" id="status-dot"></div>
-    <span id="status-text">Online</span>
+  <div class="masthead-right">
+    <div class="masthead-balance">
+      <span style="color:var(--ink-3);">balance</span>
+      <span class="amt" id="header-balance">$0.00</span>
+    </div>
+    <div class="status-pill">
+      <div class="status-dot" id="status-dot"></div>
+      <span id="status-text">Online</span>
+    </div>
   </div>
 </header>
 
-<nav class="app-nav">
-  <button class="nav-btn active" onclick="showView('inventory')">
-    ▣ Inventory
+<nav class="primary-nav">
+  <button class="pnav-btn active" onclick="showView('inventory', this)">
+    <span class="mod-tag">01</span> Inventory
     <span class="nav-badge" id="low-badge" style="display:none">0</span>
   </button>
-  <button class="nav-btn" onclick="showView('shopping')">
-    ⊞ Shopping List
+  <button class="pnav-btn" onclick="showView('shopping', this)">
+    <span class="mod-tag">02</span> Shopping
     <span class="nav-badge" id="shop-badge" style="display:none">0</span>
   </button>
-  <button class="nav-btn" onclick="showView('recipes')">
-    ◈ Menu Planner
+  <button class="pnav-btn" onclick="showView('menu', this)">
+    <span class="mod-tag">03</span> Menu
+  </button>
+  <button class="pnav-btn" onclick="showView('finance', this)">
+    <span class="mod-tag">04</span> Finance
+    <span class="nav-badge fin" id="bills-badge" style="display:none">0</span>
+  </button>
+  <button class="pnav-btn" onclick="showView('log-tx', this)">
+    <span class="mod-tag">+</span> Log
+  </button>
+  <button class="pnav-btn" onclick="showView('settings', this)">
+    <span class="mod-tag">⚙</span> Settings
   </button>
 </nav>
 
 <main class="app-main">
 
-  <section id="view-inventory" class="view active">
+<section id="view-inventory" class="view active">
+  <div class="section-header">
+    <div>
+      <div class="section-title"><small>Module 01</small>Inventory Ledger</div>
+    </div>
+    <div style="display:flex;gap:.5rem;flex-wrap:wrap;align-items:center;">
+      <button class="btn btn-ghost btn-sm" onclick="startVoice('use')">🎤 Voice Usage</button>
+      <button class="btn btn-ghost btn-sm" onclick="window.print()">⎙ Print</button>
+      <button class="btn btn-primary btn-sm" onclick="openAddItemModal()">+ Add Item</button>
+    </div>
+  </div>
+  <div id="universal-voice-status" style="font-family:var(--mono);font-size:.72rem;color:var(--grove);margin-bottom:1rem;font-style:italic;"></div>
 
-    <div class="section-header">
-      <div>
-        <div class="section-title">
-          <small>Module 01</small>
-          Inventory Ledger
+  <div class="summary-grid" id="inv-summary">
+    <div class="summary-card"><div class="label">Total Items</div><div class="value grove" id="stat-total">0</div><div class="sub">in inventory</div></div>
+    <div class="summary-card"><div class="label">Low Stock</div><div class="value warn" id="stat-low">0</div><div class="sub">below threshold</div></div>
+    <div class="summary-card"><div class="label">Pantry Value</div><div class="value" id="stat-value">$0.00</div><div class="sub">estimated</div></div>
+    <div class="summary-card"><div class="label">Categories</div><div class="value" id="stat-cats">0</div><div class="sub">tracked</div></div>
+  </div>
+
+  <div class="filter-strip">
+    <input type="text" id="inv-search" placeholder="Search items..." oninput="renderInventory()" style="width:170px">
+    <select id="inv-cat-filter" onchange="renderInventory()">
+      <option value="">All Categories</option>
+      <option>Produce</option><option>Dairy</option><option>Protein</option><option>Grain</option>
+      <option>Pantry</option><option>Frozen</option><option>Cleaning</option><option>Laundry</option>
+      <option>Household</option><option>Personal Care</option><option>Other</option>
+    </select>
+    <label style="font-family:var(--mono);font-size:.62rem;color:var(--ink-3);display:flex;align-items:center;gap:.3rem;cursor:pointer;">
+      <input type="checkbox" id="inv-low-only" onchange="renderInventory()" style="accent-color:var(--grove)"> Low only
+    </label>
+  </div>
+
+  <div class="data-table-wrap">
+    <table class="data-table" id="inv-table">
+      <thead><tr>
+        <th>Item</th><th>Category</th><th>Qty</th><th>Unit</th><th>Unit Price</th><th>Threshold</th><th>Status</th><th>Actions</th>
+      </tr></thead>
+      <tbody id="inv-tbody"></tbody>
+    </table>
+    <div class="empty-state" id="inv-empty" style="display:none"><div class="icon">⊡</div><p>No items yet — add your first pantry item above.</p></div>
+  </div>
+</section>
+
+<section id="view-shopping" class="view">
+  <div class="section-header">
+    <div><div class="section-title"><small>Module 02</small>Shopping List</div></div>
+    <div style="display:flex;gap:.5rem;flex-wrap:wrap;">
+      <button class="btn btn-ghost btn-sm" onclick="syncLowStock()">⟳ Sync Low-Stock</button>
+      <button class="btn btn-ghost btn-sm" onclick="clearChecked()">✕ Clear Checked</button>
+      <button class="btn btn-ghost btn-sm" onclick="window.print()">⎙ Print</button>
+    </div>
+  </div>
+
+  <div class="shop-to-fin" id="shop-fin-bridge">
+    <div class="info">
+      <div class="cap">🔗 Finance Sync</div>
+      <div class="desc">Log checked items as a Spend transaction in Finance</div>
+    </div>
+    <div style="display:flex;align-items:center;gap:.8rem;flex-wrap:wrap;">
+      <div class="total-preview"><span style="font-size:.65rem;color:var(--ink-3);font-family:var(--mono);">checked total: </span><span id="shop-fin-total">$0.00</span></div>
+      <button class="btn btn-fin btn-sm" onclick="logShoppingToFinance()">→ Log to Finance</button>
+    </div>
+  </div>
+
+  <form class="form-card" onsubmit="addShoppingItem(event)">
+    <h3>+ Add to List</h3>
+    <div class="form-row">
+      <div class="form-group" style="flex:2;min-width:150px;">
+        <label>Item Name</label>
+        <div class="input-mic-wrap">
+          <input type="text" id="sl-name" placeholder="e.g. Brown Rice, Bleach">
+          <button class="mic-btn" id="sl-mic-btn" onclick="startVoice('shopping')" type="button" title="Dictate">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="9" y="2" width="6" height="11" rx="3"/><path d="M5 10a7 7 0 0014 0M12 19v3M9 22h6"/></svg>
+          </button>
         </div>
+        <div class="voice-status" id="sl-voice-status"></div>
       </div>
-      <div style="display:flex;gap:.6rem;flex-wrap:wrap;align-items:center;">
-        <button class="btn btn-ghost btn-sm" onclick="startVoice('use')" style="color:var(--bamboo-dk); border-color:var(--bamboo);">
-          🎤 Voice Log Usage
-        </button>
-        <button class="btn btn-ghost btn-sm" onclick="window.print()">⎙ Print Report</button>
-        <button class="btn btn-primary btn-sm" onclick="openAddItemModal()">+ Add Item</button>
+      <div class="form-group" style="flex:1;min-width:80px;"><label>Qty</label><input type="number" id="sl-qty" placeholder="1" min="0" step="any"></div>
+      <div class="form-group" style="flex:1;min-width:80px;"><label>Unit</label><input type="text" id="sl-unit" placeholder="lbs, btls"></div>
+      <div class="form-group" style="flex:1;min-width:80px;"><label>Est. Price</label><input type="number" id="sl-price" placeholder="0.00" step="0.01" min="0"></div>
+      <button type="submit" class="btn btn-primary" style="height:42px;align-self:flex-end;">Add</button>
+    </div>
+  </form>
+
+  <div class="data-table-wrap" id="shopping-list-wrap">
+    <div id="shopping-list-items"></div>
+    <div class="empty-state" id="shop-empty" style="display:none"><div class="icon">⊟</div><p>Your list is empty. Add items or sync from inventory.</p></div>
+    <div class="shopping-total"><span>Estimated Total (all)</span><strong id="shop-total">$0.00</strong></div>
+  </div>
+
+  <form class="form-card" style="margin-top:1.1rem;" onsubmit="updateActualPrice(event)">
+    <h3>↺ Update Actual Price</h3>
+    <p style="font-size:.72rem;color:var(--ink-3);margin-bottom:.8rem;font-family:var(--mono);">After shopping, update an item's price to track inflation.</p>
+    <div class="form-row">
+      <div class="form-group"><label>Item Name</label><input type="text" id="price-update-name" placeholder="Exact item name" list="inv-datalist"><datalist id="inv-datalist"></datalist></div>
+      <div class="form-group"><label>Actual Price Paid</label><input type="number" id="price-update-val" placeholder="0.00" step="0.01" min="0"></div>
+      <button type="submit" class="btn btn-ghost" style="height:42px;align-self:flex-end;">Save Price</button>
+    </div>
+  </form>
+</section>
+
+<section id="view-menu" class="view">
+  <div class="section-header">
+    <div><div class="section-title"><small>Module 03</small>Menu Planner & Ops</div></div>
+    <div style="display:flex;gap:.5rem;flex-wrap:wrap;">
+      <button class="btn btn-ghost btn-sm" id="show-available-btn" onclick="toggleAvailableOnly()">◈ In-Stock Only</button>
+      <button class="btn btn-primary btn-sm" onclick="openAddRecipeModal()">+ New Plan</button>
+    </div>
+  </div>
+
+  <div id="recipe-list-view">
+    <div class="recipe-grid" id="recipe-grid"></div>
+    <div class="empty-state" id="recipe-empty" style="display:none"><div class="icon">◻</div><p>No plans yet — create your first meal or chore plan.</p></div>
+  </div>
+
+  <div class="recipe-detail" id="recipe-detail">
+    <button class="btn btn-ghost btn-sm" onclick="closeRecipeDetail()" style="margin-bottom:1rem;">← Back to Menu</button>
+    <div class="recipe-detail-header">
+      <h2 id="rd-title"></h2>
+      <div id="rd-meta" style="display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.5rem;"></div>
+      <div style="margin-top:.65rem;font-family:var(--mono);font-size:.72rem;color:var(--sky);">Est. Cost: <strong id="rd-cost">$0.00</strong></div>
+    </div>
+    <div id="rd-missing-alert" class="alert-bar alert-warn" style="display:none;justify-content:space-between;margin-top:1rem;margin-bottom:1.1rem;">
+      <span>⚠️ <strong id="rd-missing-count">0</strong> missing items for this plan.</span>
+      <button class="btn btn-primary btn-sm" onclick="addMissingToCart()" style="background:var(--amber);border-color:#7a5a00;">Add to List</button>
+    </div>
+    <h4 style="font-family:var(--mono);font-size:.6rem;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3);margin-bottom:.5rem;">Required Items</h4>
+    <ul class="recipe-ingredient-list" id="rd-ingredients"></ul>
+    <h4 style="font-family:var(--mono);font-size:.6rem;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3);margin-bottom:.5rem;margin-top:1rem;">Instructions</h4>
+    <div class="recipe-instructions" id="rd-instructions"></div>
+    <div style="display:flex;gap:.5rem;margin-top:.9rem;">
+      <button class="btn btn-ghost btn-sm" onclick="printRecipe()">⎙ Print Card</button>
+      <button class="btn btn-danger btn-sm" onclick="deleteCurrentRecipe()">✕ Delete Plan</button>
+    </div>
+  </div>
+</section>
+
+<section id="view-finance" class="view">
+  <div class="section-header">
+    <div><div class="section-title"><small>Module 04 · Tight Ship</small>Finance Dashboard</div></div>
+    <div style="display:flex;gap:.5rem;flex-wrap:wrap;">
+      <button class="btn btn-ghost btn-sm" onclick="showView('log-tx', document.querySelector('.pnav-btn:nth-child(5)'))">+ Log Transaction</button>
+    </div>
+  </div>
+
+  <div class="fin-balance-card" id="fin-balance-card">
+    <div class="label">Available Balance</div>
+    <div class="amount" id="fin-balance-amount">$0.00</div>
+    <div class="sub">Income − Spend − Paid Bills</div>
+  </div>
+
+  <div class="fin-stats-grid">
+    <div class="fin-stat-card">
+      <div class="label"><span style="color:var(--fin-income)">↑</span> Income</div>
+      <div class="amount" style="color:var(--fin-income)" id="fin-income-total">$0.00</div>
+    </div>
+    <div class="fin-stat-card">
+      <div class="label"><span style="color:var(--fin-spend)">↓</span> Spend</div>
+      <div class="amount" style="color:var(--fin-spend)" id="fin-spend-total">$0.00</div>
+      <div class="note">incl. paid bills</div>
+    </div>
+  </div>
+
+  <div class="fin-unpaid-bar" id="fin-unpaid-bar">
+    <div class="left">
+      <div class="icon">⏱</div>
+      <div>
+        <div class="label">Unpaid Bills</div>
+        <div class="count" id="fin-unpaid-count">None outstanding</div>
       </div>
     </div>
+    <div class="total" id="fin-unpaid-total">$0.00</div>
+  </div>
 
-    <div id="universal-voice-status" style="font-family:var(--mono); font-size:.78rem; color:var(--bamboo-dk); margin-bottom:1rem; font-style:italic;"></div>
-
-    <div class="summary-grid" id="inv-summary">
-      <div class="summary-card">
-        <div class="label">Total Items</div>
-        <div class="value green" id="stat-total">0</div>
-        <div class="sub">in inventory</div>
-      </div>
-      <div class="summary-card">
-        <div class="label">Low Stock</div>
-        <div class="value warn" id="stat-low">0</div>
-        <div class="sub">below threshold</div>
-      </div>
-      <div class="summary-card">
-        <div class="label">Pantry Value</div>
-        <div class="value" id="stat-value">$0.00</div>
-        <div class="sub">estimated</div>
-      </div>
-      <div class="summary-card">
-        <div class="label">Categories</div>
-        <div class="value" id="stat-cats">0</div>
-        <div class="sub">tracked</div>
-      </div>
+  <div class="sync-banner" id="fin-shop-sync-banner" style="display:none;">
+    <div>
+      <div class="label">🛒 Shopping Sync Available</div>
+      <div class="desc">You have <strong id="fin-checked-count">0</strong> checked shopping items totalling <strong id="fin-checked-total">$0.00</strong></div>
     </div>
+    <button class="btn btn-fin btn-sm" onclick="logShoppingToFinance()">→ Log as Spend</button>
+  </div>
 
-    <div class="filter-strip">
-      <input type="text" id="inv-search" placeholder="Search items..." oninput="renderInventory()" style="width:180px">
-      <select id="inv-cat-filter" onchange="renderInventory()">
-        <option value="">All Categories</option>
-        <option value="Produce">Produce</option>
-        <option value="Dairy">Dairy</option>
-        <option value="Protein">Protein</option>
-        <option value="Grain">Grain</option>
-        <option value="Pantry">Pantry</option>
-        <option value="Frozen">Frozen</option>
-        <option value="Cleaning">Cleaning</option>
-        <option value="Laundry">Laundry</option>
-        <option value="Household">Household</option>
-        <option value="Personal Care">Personal Care</option>
-        <option value="Other">Other</option>
-      </select>
-      <label style="font-family:var(--mono);font-size:.68rem;color:var(--ink-3);display:flex;align-items:center;gap:.3rem;cursor:pointer;">
-        <input type="checkbox" id="inv-low-only" onchange="renderInventory()" style="accent-color:var(--bamboo)">
-        Low stock only
-      </label>
-    </div>
-
+  <div onclick="toggleLedger()" class="ledger-toggle">
+    <span class="title">Transaction Ledger</span>
+    <span class="ledger-chevron" id="ledger-chevron">▼</span>
+  </div>
+  <div id="ledger-container" style="display:none;">
     <div class="data-table-wrap">
-      <table class="data-table" id="inv-table">
-        <thead>
-          <tr>
-            <th>Item</th>
-            <th>Category</th>
-            <th>Quantity</th>
-            <th>Unit</th>
-            <th>Unit Price</th>
-            <th>Threshold</th>
-            <th>Status</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody id="inv-tbody"></tbody>
-      </table>
-      <div class="empty-state" id="inv-empty" style="display:none">
-        <div class="icon">⊡</div>
-        <p>No items yet — add your first pantry item above.</p>
+      <div id="fin-ledger-list"><div class="empty-state"><div class="icon">◌</div><p>No transactions logged yet.</p></div></div>
+    </div>
+  </div>
+</section>
+
+<section id="view-log-tx" class="view">
+  <div class="section-header">
+    <div><div class="section-title"><small>Finance</small>Log Transaction</div></div>
+  </div>
+
+  <div class="fin-type-switch">
+    <label>
+      <input type="radio" name="txType" value="income" checked onchange="updateFinFormUI()">
+      <div class="fin-type-btn">↑<span>Income</span></div>
+    </label>
+    <label>
+      <input type="radio" name="txType" value="spend" onchange="updateFinFormUI()">
+      <div class="fin-type-btn">↓<span>Spend</span></div>
+    </label>
+    <label>
+      <input type="radio" name="txType" value="bill" onchange="updateFinFormUI()">
+      <div class="fin-type-btn">⊟<span>Bill</span></div>
+    </label>
+  </div>
+
+  <form id="fin-tx-form" class="form-card" onsubmit="handleLogTransaction(event)">
+    <div class="form-row" style="margin-bottom:.9rem;">
+      <div class="form-group" style="flex:1;min-width:130px;">
+        <label>Amount</label>
+        <div style="position:relative;">
+          <span style="position:absolute;left:.7rem;top:50%;transform:translateY(-50%);color:var(--ink-3);font-weight:700;">$</span>
+          <input type="number" id="tx-amount" step="0.01" min="0.01" required style="padding-left:1.6rem;" placeholder="0.00">
+        </div>
+      </div>
+      <div class="form-group" style="flex:2;min-width:160px;">
+        <label id="lbl-description">Source</label>
+        <input type="text" id="tx-description" required placeholder="e.g. Freelance Client">
       </div>
     </div>
 
-  </section>
-
-  <section id="view-shopping" class="view">
-
-    <div class="section-header">
-      <div>
-        <div class="section-title">
-          <small>Module 02</small>
-          Shopping List
+    <div id="bill-paid-toggle" class="bill-toggle-row" onclick="toggleBillPaid()" style="display:none;">
+      <div style="display:flex;align-items:center;gap:.7rem;">
+        <span id="bill-paid-icon" style="font-size:1.1rem;">✅</span>
+        <div>
+          <div style="font-weight:600;font-size:.82rem;" id="bill-paid-text">I have already paid this</div>
+          <div style="font-family:var(--mono);font-size:.62rem;color:var(--sky);" id="bill-paid-sub">Toggle to set as upcoming bill</div>
         </div>
       </div>
-      <div style="display:flex;gap:.6rem;flex-wrap:wrap;">
-        <button class="btn btn-ghost btn-sm" onclick="syncLowStock()">⟳ Sync Low-Stock</button>
-        <button class="btn btn-ghost btn-sm" onclick="clearChecked()">✕ Clear Checked</button>
-        <button class="btn btn-ghost btn-sm" onclick="window.print()">⎙ Print List</button>
+      <input type="checkbox" id="tx-is-paid" checked style="width:18px;height:18px;accent-color:var(--sky);pointer-events:none;">
+    </div>
+
+    <div class="form-row" id="field-date">
+      <div class="form-group" style="flex:1;min-width:140px;">
+        <label id="lbl-date">Date Received</label>
+        <input type="date" id="tx-date" required>
       </div>
     </div>
 
-    <form class="form-card" onsubmit="addShoppingItem(event)">
-      <h3>+ Add to List</h3>
-      <div class="form-row" style="align-items:flex-end;gap:.75rem;flex-wrap:wrap;">
-        <div class="form-group" style="flex:2;min-width:160px;">
-          <label>Item Name</label>
-          <div class="input-mic-wrap">
-            <input type="text" id="sl-name" placeholder="e.g. Bleach, Brown Rice">
-            <button class="mic-btn" id="sl-mic-btn" onclick="startVoice('shopping')" type="button" title="Dictate item">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                <rect x="9" y="2" width="6" height="11" rx="3"/>
-                <path d="M5 10a7 7 0 0014 0M12 19v3M9 22h6"/>
-              </svg>
-            </button>
-          </div>
-          <div class="voice-status" id="sl-voice-status"></div>
-        </div>
-        <div class="form-group" style="flex:1;min-width:90px;">
-          <label>Qty</label>
-          <input type="number" id="sl-qty" placeholder="1" min="0" step="any">
-        </div>
-        <div class="form-group" style="flex:1;min-width:90px;">
-          <label>Unit</label>
-          <input type="text" id="sl-unit" placeholder="lbs, btls">
-        </div>
-        <div class="form-group" style="flex:1;min-width:90px;">
-          <label>Est. Price</label>
-          <input type="number" id="sl-price" placeholder="0.00" step="0.01" min="0">
-        </div>
-        <button type="submit" class="btn btn-primary" style="flex-shrink:0;height:38px;align-self:flex-end;">Add</button>
-      </div>
-    </form>
-
-    <div class="data-table-wrap" id="shopping-list-wrap">
-      <div id="shopping-list-items"></div>
-      <div class="empty-state" id="shop-empty" style="display:none">
-        <div class="icon">⊟</div>
-        <p>Your list is empty. Add items or sync from inventory.</p>
-      </div>
-      <div class="shopping-total">
-        <span>Estimated Total</span>
-        <strong id="shop-total">$0.00</strong>
+    <div class="form-row" id="field-due-date" style="display:none;margin-top:.65rem;">
+      <div class="form-group" style="flex:1;min-width:140px;">
+        <label style="color:var(--rose)">Due Date</label>
+        <input type="date" id="tx-due-date" style="border-color:#3a1a1a;">
       </div>
     </div>
 
-    <form class="form-card" style="margin-top:1.2rem;" onsubmit="updateActualPrice(event)">
-      <h3>↺ Update Actual Price (Post-Shop)</h3>
-      <p style="font-size:.78rem;color:var(--ink-3);margin-bottom:.9rem;font-family:var(--mono);">
-        After shopping, update an item's actual price to track inflation over time.
-      </p>
-      <div class="form-row">
-        <div class="form-group">
-          <label>Item Name</label>
-          <input type="text" id="price-update-name" placeholder="Exact item name" list="inv-datalist">
-          <datalist id="inv-datalist"></datalist>
-        </div>
-        <div class="form-group">
-          <label>Actual Price Paid</label>
-          <input type="number" id="price-update-val" placeholder="0.00" step="0.01" min="0">
-        </div>
-        <button type="submit" class="btn btn-ghost" style="height:38px;align-self:flex-end;">Save Price</button>
-      </div>
-    </form>
+    <div style="margin-top:1.1rem;display:flex;gap:.65rem;">
+      <button type="button" id="btn-cancel-edit" onclick="cancelEdit()" style="display:none;" class="btn btn-ghost">Cancel</button>
+      <button type="submit" id="btn-submit-tx" class="btn btn-primary" style="flex:1;justify-content:center;padding:.8rem;">Save Transaction</button>
+    </div>
+  </form>
+</section>
 
-  </section>
+<section id="view-settings" class="view">
+  <div class="section-header">
+    <div><div class="section-title"><small>System</small>Settings & Data</div></div>
+  </div>
 
-  <section id="view-recipes" class="view">
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;flex-wrap:wrap;" class="settings-cols">
 
-    <div class="section-header">
-      <div>
-        <div class="section-title">
-          <small>Module 03</small>
-          Menu Planner & Operations
+    <div>
+      <h3 style="font-family:var(--mono);font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3);margin-bottom:.75rem;margin-left:.1rem;">Pantry Data</h3>
+      <div class="data-table-wrap">
+        <div class="settings-item" onclick="window.print()">
+          <div class="sicon" style="background:var(--surface-2);border:1px solid var(--border);">⎙</div>
+          <div><div class="stitle">Print Report</div><div class="sdesc">Print current view</div></div>
         </div>
-      </div>
-      <div style="display:flex;gap:.6rem;flex-wrap:wrap;">
-        <button class="btn btn-ghost btn-sm" id="show-available-btn" onclick="toggleAvailableOnly()">◈ In-Stock Only</button>
-        <button class="btn btn-primary btn-sm" onclick="openAddRecipeModal()">+ New Plan</button>
       </div>
     </div>
 
-    <div id="recipe-list-view">
-      <div class="recipe-grid" id="recipe-grid"></div>
-      <div class="empty-state" id="recipe-empty" style="display:none">
-        <div class="icon">◻</div>
-        <p>No plans yet — create your first meal or chore plan.</p>
-      </div>
-    </div>
-
-    <div class="recipe-detail" id="recipe-detail">
-      <button class="btn btn-ghost btn-sm" onclick="closeRecipeDetail()" style="margin-bottom:1rem;">← Back to Menu</button>
-      <div class="recipe-detail-header">
-        <h2 id="rd-title">Recipe Name</h2>
-        <div id="rd-meta" style="display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.5rem;"></div>
-        <div style="margin-top:.75rem;font-family:var(--mono);font-size:.78rem;color:var(--slate);">
-          Estimated Cost: <strong id="rd-cost">$0.00</strong>
+    <div>
+      <h3 style="font-family:var(--mono);font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3);margin-bottom:.75rem;margin-left:.1rem;">Finance Data</h3>
+      <div class="data-table-wrap">
+        <div class="settings-item" onclick="downloadCSV()">
+          <div class="sicon" style="background:var(--surface-2);border:1px solid var(--border);">📊</div>
+          <div><div class="stitle">Export to CSV</div><div class="sdesc">Download finance ledger</div></div>
+        </div>
+        <div class="settings-item" onclick="shareApp()">
+          <div class="sicon" style="background:var(--sky-lt);border:1px solid #1a3050;">↗</div>
+          <div><div class="stitle">Share App</div><div class="sdesc">Send link to others</div></div>
+        </div>
+        <div class="settings-item" onclick="promptWipeFinance()">
+          <div class="sicon" style="background:var(--rose-lt);border:1px solid #3a1010;">🗑</div>
+          <div><div class="stitle" style="color:var(--rose);">Wipe Finance Data</div><div class="sdesc" style="color:var(--rose);">Delete all transactions</div></div>
         </div>
       </div>
-
-      <div id="rd-missing-alert" class="alert-bar alert-warn" style="display:none; justify-content:space-between; margin-top:1rem; margin-bottom:1.2rem;">
-        <span>⚠️ <strong id="rd-missing-count">0</strong> missing items for this plan.</span>
-        <button class="btn btn-primary btn-sm" onclick="addMissingToCart()" style="background:var(--warn); border-color:#7a5a00; color:#fff;">Add to List</button>
-      </div>
-
-      <h4 style="font-family:var(--mono);font-size:.68rem;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3);margin-bottom:.6rem;">Required Items</h4>
-      <ul class="recipe-ingredient-list" id="rd-ingredients"></ul>
-      <h4 style="font-family:var(--mono);font-size:.68rem;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3);margin-bottom:.6rem;">Instructions</h4>
-      <div class="recipe-instructions" id="rd-instructions"></div>
-      <div style="display:flex;gap:.6rem;margin-top:1rem;">
-        <button class="btn btn-ghost btn-sm" onclick="printRecipe()">⎙ Print Card</button>
-        <button class="btn btn-danger btn-sm" onclick="deleteCurrentRecipe()">✕ Delete Plan</button>
-      </div>
     </div>
 
-  </section>
+  </div>
+
+  <div style="margin-top:1.5rem;">
+    <h3 style="font-family:var(--mono);font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3);margin-bottom:.75rem;margin-left:.1rem;">About HQ Command Centre v2</h3>
+    <div class="data-table-wrap" style="padding:1.2rem;font-family:var(--mono);font-size:.72rem;color:var(--ink-3);line-height:1.8;">
+      <p>Unified dashboard merging <strong style="color:var(--ink)">Pantry Command</strong> (inventory, shopping, menu planning) with <strong style="color:var(--ink)">Tight Ship</strong> (personal finance tracking).</p>
+      <p style="margin-top:.5rem;">Shopping list integrates with Finance — log checked purchases directly as spend transactions.</p>
+      <p style="margin-top:.5rem;">Pantry data syncs via <strong style="color:var(--grove)">Firebase Firestore</strong> (cloud + offline). Finance data stored in <strong style="color:var(--sky)">localStorage</strong> (device-only).</p>
+    </div>
+  </div>
+</section>
 
 </main>
 
@@ -1099,54 +833,31 @@ a { color: inherit; text-decoration: none; }
       <button type="button" class="btn btn-ghost btn-sm" onclick="closeModal('item-modal')">✕</button>
     </div>
     <div class="modal-body">
-      <div class="form-row" style="margin-bottom:.75rem;">
+      <div class="form-row" style="margin-bottom:.65rem;">
         <div class="form-group" style="flex:1">
           <label>Item Name *</label>
           <div class="input-mic-wrap">
             <input type="text" id="item-name" placeholder="e.g. Jasmine Rice, Bleach" required>
-            <button class="mic-btn" id="inv-mic-btn" onclick="startVoice('inventory')" type="button" title="Dictate item">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                <rect x="9" y="2" width="6" height="11" rx="3"/>
-                <path d="M5 10a7 7 0 0014 0M12 19v3M9 22h6"/>
-              </svg>
+            <button class="mic-btn" id="inv-mic-btn" onclick="startVoice('inventory')" type="button">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="9" y="2" width="6" height="11" rx="3"/><path d="M5 10a7 7 0 0014 0M12 19v3M9 22h6"/></svg>
             </button>
           </div>
           <div class="voice-status" id="inv-voice-status"></div>
         </div>
       </div>
       <div class="form-grid" style="grid-template-columns:1fr 1fr;">
-        <div class="form-group">
-          <label>Quantity *</label>
-          <input type="number" id="item-qty" placeholder="0" min="0" step="any" required>
-        </div>
-        <div class="form-group">
-          <label>Unit *</label>
-          <input type="text" id="item-unit" placeholder="lbs, cans, btls..." required>
-        </div>
+        <div class="form-group"><label>Quantity *</label><input type="number" id="item-qty" placeholder="0" min="0" step="any" required></div>
+        <div class="form-group"><label>Unit *</label><input type="text" id="item-unit" placeholder="lbs, cans..." required></div>
         <div class="form-group">
           <label>Category</label>
           <select id="item-cat">
-            <option value="Produce">Produce</option>
-            <option value="Dairy">Dairy</option>
-            <option value="Protein">Protein</option>
-            <option value="Grain" selected>Grain</option>
-            <option value="Pantry">Pantry</option>
-            <option value="Frozen">Frozen</option>
-            <option value="Cleaning">Cleaning</option>
-            <option value="Laundry">Laundry</option>
-            <option value="Household">Household</option>
-            <option value="Personal Care">Personal Care</option>
-            <option value="Other">Other</option>
+            <option>Produce</option><option>Dairy</option><option>Protein</option><option selected>Grain</option>
+            <option>Pantry</option><option>Frozen</option><option>Cleaning</option><option>Laundry</option>
+            <option>Household</option><option>Personal Care</option><option>Other</option>
           </select>
         </div>
-        <div class="form-group">
-          <label>Unit Price ($)</label>
-          <input type="number" id="item-price" placeholder="0.00" step="0.01" min="0">
-        </div>
-        <div class="form-group">
-          <label>Low-Stock Threshold</label>
-          <input type="number" id="item-threshold" placeholder="e.g. 2" min="0" step="any">
-        </div>
+        <div class="form-group"><label>Unit Price ($)</label><input type="number" id="item-price" placeholder="0.00" step="0.01" min="0"></div>
+        <div class="form-group"><label>Low-Stock Threshold</label><input type="number" id="item-threshold" placeholder="e.g. 2" min="0" step="any"></div>
       </div>
       <input type="hidden" id="item-edit-id">
     </div>
@@ -1164,18 +875,10 @@ a { color: inherit; text-decoration: none; }
       <button type="button" class="btn btn-ghost btn-sm" onclick="closeModal('adjust-modal')">✕</button>
     </div>
     <div class="modal-body">
-      <p style="font-family:var(--mono);font-size:.78rem;color:var(--ink-3);margin-bottom:1rem;">
-        Adjusting: <strong id="adjust-item-name" style="color:var(--ink)"></strong>
-      </p>
+      <p style="font-family:var(--mono);font-size:.72rem;color:var(--ink-3);margin-bottom:.9rem;">Adjusting: <strong id="adjust-item-name" style="color:var(--ink)"></strong></p>
       <div class="form-row">
-        <div class="form-group">
-          <label>New Quantity</label>
-          <input type="number" id="adjust-qty" min="0" step="any" required>
-        </div>
-        <div class="form-group">
-          <label>Unit</label>
-          <input type="text" id="adjust-unit" readonly style="opacity:.6">
-        </div>
+        <div class="form-group"><label>New Quantity</label><input type="number" id="adjust-qty" min="0" step="any" required></div>
+        <div class="form-group"><label>Unit</label><input type="text" id="adjust-unit" readonly style="opacity:.6"></div>
       </div>
       <input type="hidden" id="adjust-id">
     </div>
@@ -1187,75 +890,55 @@ a { color: inherit; text-decoration: none; }
 </div>
 
 <div class="modal-overlay" id="recipe-modal">
-  <form class="modal" style="max-width:680px;" onsubmit="saveRecipe(event)">
+  <form class="modal" style="max-width:660px;" onsubmit="saveRecipe(event)">
     <div class="modal-header">
-      <h3>New Plan</h3>
+      <h3>New Plan / Recipe</h3>
       <button type="button" class="btn btn-ghost btn-sm" onclick="closeModal('recipe-modal')">✕</button>
     </div>
     <div class="modal-body">
-
-      <div class="form-card" style="background: var(--surface); border-color: var(--bamboo); margin-bottom: 1.5rem; padding: 1rem;">
-        <h3 style="margin-bottom: .5rem; color: var(--bamboo-dk);">🌐 Auto-Import from URL</h3>
-        <p style="font-size: .75rem; color: var(--ink-2); margin-bottom: .75rem; font-family: var(--mono);">
-          Paste a recipe website link. We will extract the ingredients and instructions automatically.
-        </p>
-        <div class="input-mic-wrap" style="align-items: flex-end;">
-          <input type="url" id="rec-url-import" placeholder="https://..." style="background: #fff; width: 100%;">
-          <button type="button" class="btn btn-primary" id="btn-import-url" onclick="importFromUrl()" style="height: auto; padding: .6rem 1rem;">Import</button>
+      <div class="form-card" style="background:var(--surface-2);border-color:var(--border-soft);margin-bottom:1rem;padding:.9rem;">
+        <h3 style="margin-bottom:.4rem;color:var(--mod-accent);font-size:.85rem;">🌐 Import from URL</h3>
+        <div class="input-mic-wrap" style="align-items:flex-end;">
+          <input type="url" id="rec-url-import" placeholder="https://..." style="background:var(--bg-2);">
+          <button type="button" class="btn btn-primary btn-sm" id="btn-import-url" onclick="importFromUrl()">Import</button>
         </div>
       </div>
-
-      <div class="form-card" style="background: var(--bamboo-lt); border-color: var(--bamboo); margin-bottom: 1.5rem; padding: 1rem;">
-        <h3 style="margin-bottom: .5rem; color: var(--bamboo-dk);">📋 Smart Quick-Paste</h3>
-        <p style="font-size: .75rem; color: var(--ink-2); margin-bottom: .75rem; font-family: var(--mono);">
-          Paste raw text from a website here. The system will attempt to sort items and instructions for you.
-        </p>
-        <div class="input-mic-wrap" style="align-items: flex-end;">
-          <textarea id="rec-smart-paste" placeholder="Paste full text here..." rows="3" style="background: #fff;"></textarea>
-          <button type="button" class="btn btn-primary" onclick="parseRawRecipeText()" style="height: auto; padding: .6rem 1rem;">Sort Text</button>
+      <div class="form-card" style="background:var(--surface-2);border-color:var(--border-soft);margin-bottom:1rem;padding:.9rem;">
+        <h3 style="margin-bottom:.4rem;font-size:.85rem;">📋 Smart Paste</h3>
+        <div class="input-mic-wrap" style="align-items:flex-end;">
+          <textarea id="rec-smart-paste" placeholder="Paste raw recipe text here..." rows="3" style="background:var(--bg-2);"></textarea>
+          <button type="button" class="btn btn-ghost btn-sm" onclick="parseRawRecipeText()">Sort</button>
         </div>
       </div>
-      <div class="form-group" style="margin-bottom:.75rem;">
-        <label>Plan / Recipe Name *</label>
-        <input type="text" id="rec-name" placeholder="e.g. Miso Glazed Salmon, Deep Clean Weekend" required>
-      </div>
-      <div class="form-grid" style="grid-template-columns:1fr 1fr;margin-bottom:.75rem;">
-        <div class="form-group">
-          <label>Servings / Scale</label>
-          <input type="number" id="rec-servings" placeholder="4" min="1">
-        </div>
-        <div class="form-group">
-          <label>Time</label>
-          <input type="text" id="rec-time" placeholder="30 min">
-        </div>
+      <div class="form-group" style="margin-bottom:.65rem;"><label>Plan Name *</label><input type="text" id="rec-name" required placeholder="e.g. Miso Salmon, Weekend Deep Clean"></div>
+      <div class="form-grid" style="grid-template-columns:1fr 1fr;margin-bottom:.65rem;">
+        <div class="form-group"><label>Servings</label><input type="number" id="rec-servings" placeholder="4" min="1"></div>
+        <div class="form-group"><label>Time</label><input type="text" id="rec-time" placeholder="30 min"></div>
         <div class="form-group">
           <label>Category</label>
-          <select id="rec-cat">
-            <option value="Breakfast">Breakfast</option>
-            <option value="Lunch">Lunch</option>
-            <option value="Dinner" selected>Dinner</option>
-            <option value="Snack">Snack</option>
-            <option value="Dessert">Dessert</option>
-            <option value="Cleaning Plan">Cleaning Plan</option>
-          </select>
+          <select id="rec-cat"><option>Breakfast</option><option>Lunch</option><option selected>Dinner</option><option>Snack</option><option>Dessert</option><option>Cleaning Plan</option></select>
         </div>
       </div>
-
-      <div class="form-group" style="margin-bottom:1rem;">
-        <label>Required Items (one per line, format: "2 lbs rice" or "1 btl bleach") *</label>
-        <textarea id="rec-ingredients" placeholder="2 lbs jasmine rice&#10;1 btl bleach" rows="6" required></textarea>
-      </div>
-
-      <div class="form-group">
-        <label>Instructions</label>
-        <textarea id="rec-instructions" placeholder="Step-by-step instructions..." rows="5"></textarea>
-      </div>
+      <div class="form-group" style="margin-bottom:.65rem;"><label>Required Items (one per line: "2 lbs rice") *</label><textarea id="rec-ingredients" placeholder="2 lbs jasmine rice&#10;1 btl soy sauce" rows="5" required></textarea></div>
+      <div class="form-group"><label>Instructions</label><textarea id="rec-instructions" placeholder="Step-by-step..." rows="4"></textarea></div>
     </div>
     <div class="modal-footer">
       <button type="button" class="btn btn-ghost" onclick="closeModal('recipe-modal')">Cancel</button>
       <button type="submit" class="btn btn-primary">Save Plan</button>
     </div>
   </form>
+</div>
+
+<div class="confirm-overlay" id="wipe-overlay">
+  <div class="confirm-card">
+    <div style="font-size:2.5rem;margin-bottom:1rem;">⚠️</div>
+    <h3>Wipe Finance Data?</h3>
+    <p>This permanently deletes all transactions from this device. This cannot be undone.</p>
+    <div style="display:flex;gap:.65rem;justify-content:center;">
+      <button class="btn btn-ghost" onclick="closeConfirm()">Cancel</button>
+      <button class="btn btn-danger" onclick="executeWipeFinance()">Yes, Wipe It</button>
+    </div>
+  </div>
 </div>
 
 <div id="toast-container"></div>
@@ -1265,1065 +948,910 @@ a { color: inherit; text-decoration: none; }
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-functions.js"></script>
 
 <script>
-// ═══════════════════════════════════════════════════════════════════
-// OPTIMIZATION HELPERS: SECURITY & CACHING
-// ═══════════════════════════════════════════════════════════════════
-
+/* ══════════════════════════════════════════════════════════════════
+   UTILITIES
+══════════════════════════════════════════════════════════════════ */
 function sanitize(str) {
   if (typeof str !== 'string') return str;
-  return str.replace(/[&<>'"]/g, tag => ({
-      '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'
-  }[tag]));
+  return str.replace(/[&<>'"]/g, t => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[t]));
 }
-
 function parseFraction(str) {
   if (!str) return 1;
-  if (str.includes('/')) {
-    const [num, den] = str.split('/');
-    return (parseFloat(num) / parseFloat(den)) || 1;
-  }
+  if (str.includes('/')) { const [n,d] = str.split('/'); return (parseFloat(n)/parseFloat(d)) || 1; }
   return parseFloat(str) || 1;
 }
+function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
+function fmt$(n) { const v = parseFloat(n)||0; return (v<0?'-':'')+'$'+Math.abs(v).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}); }
+function fmtDate(str) {
+  if (!str) return '--';
+  const p = str.split('-');
+  if (p.length !== 3) return str;
+  const d = new Date(p[0],p[1]-1,p[2]);
+  return isNaN(d)?str:d.toLocaleDateString('en-US',{month:'short',day:'numeric'});
+}
+function daysDiff(d1, d2) {
+  const a = new Date(d1.getFullYear(),d1.getMonth(),d1.getDate());
+  const b = new Date(d2.getFullYear(),d2.getMonth(),d2.getDate());
+  return Math.ceil((b-a)/(1000*60*60*24));
+}
 
-const DOM = {
-  item: {
-    name: document.getElementById('item-name'),
-    qty: document.getElementById('item-qty'),
-    unit: document.getElementById('item-unit'),
-    price: document.getElementById('item-price'),
-    threshold: document.getElementById('item-threshold'),
-    cat: document.getElementById('item-cat'),
-    id: document.getElementById('item-edit-id')
-  },
-  adjust: {
-    qty: document.getElementById('adjust-qty'),
-    unit: document.getElementById('adjust-unit'),
-    id: document.getElementById('adjust-id'),
-    nameDisplay: document.getElementById('adjust-item-name')
-  },
-  recipe: {
-    name: document.getElementById('rec-name'),
-    servings: document.getElementById('rec-servings'),
-    time: document.getElementById('rec-time'),
-    cat: document.getElementById('rec-cat'),
-    ingredients: document.getElementById('rec-ingredients'),
-    instructions: document.getElementById('rec-instructions'),
-    smartPaste: document.getElementById('rec-smart-paste')
-  },
-  shop: {
-    name: document.getElementById('sl-name'),
-    qty: document.getElementById('sl-qty'),
-    unit: document.getElementById('sl-unit'),
-    price: document.getElementById('sl-price')
-  }
-};
-
-// ═══════════════════════════════════════════════════════════════════
-// STORAGE LAYER (FIREBASE WITH OFFLINE PERSISTENCE)
-// ═══════════════════════════════════════════════════════════════════
-
-// 1. Paste your Firebase config here (from Step 1)
+/* ══════════════════════════════════════════════════════════════════
+   FIREBASE — PANTRY (Cloud Sync)
+══════════════════════════════════════════════════════════════════ */
 const firebaseConfig = {
   apiKey: "AIzaSyD57uozWpgFQ0Nk6FotIzLD4h4bd-op7hc",
-    authDomain: "pantry-command-centre.firebaseapp.com",
-    projectId: "pantry-command-centre",
-    storageBucket: "pantry-command-centre.firebasestorage.app",
-    messagingSenderId: "905897735725",
-    appId: "1:905897735725:web:970251770a5a62cfa52aa4"
+  authDomain: "pantry-command-centre.firebaseapp.com",
+  projectId: "pantry-command-centre",
+  storageBucket: "pantry-command-centre.firebasestorage.app",
+  messagingSenderId: "905897735725",
+  appId: "1:905897735725:web:970251770a5a62cfa52aa4"
 };
-
-// 2. Initialize Firebase
-if (!firebase.apps.length) {
-    firebase.initializeApp(firebaseConfig);
-}
+if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
+db.enablePersistence().catch(e => console.warn('Persistence:', e.code));
 
-// 3. Enable Offline Persistence
-db.enablePersistence()
-  .catch(function(err) {
-      if (err.code == 'failed-precondition') {
-          console.warn('Multiple tabs open, offline mode only works in one tab at a time.');
-      } else if (err.code == 'unimplemented') {
-          console.warn('The current browser does not support offline persistence.');
-      }
-  });
-
-// 4. State Variables
+/* Pantry state */
 let inventory    = [];
 let shoppingList = [];
 let recipes      = [];
 let currentRecipeId = null;
-let currentMissingIngredients = []; 
+let currentMissingIngredients = [];
 let availableOnly = false;
-let isOnline = navigator.onLine;
 
-// 5. Firebase Persist
+/* Finance state (localStorage) */
+let transactions = JSON.parse(localStorage.getItem('tightShipTransactions')) || [];
+let editingTxId  = null;
+
+/* ══ Real-time listeners ══ */
+db.collection("inventory").onSnapshot(snap => {
+  inventory = []; snap.forEach(d => inventory.push(d.data()));
+  renderInventory(); refreshDatalist();
+});
+db.collection("shopping").onSnapshot(snap => {
+  shoppingList = []; snap.forEach(d => shoppingList.push(d.data()));
+  renderShopping(); updateFinShopSync();
+});
+db.collection("recipes").onSnapshot(snap => {
+  recipes = []; snap.forEach(d => recipes.push(d.data()));
+  renderRecipes();
+});
+
 function persist() {
-  inventory.forEach(item => {
-    db.collection("inventory").doc(item.id).set(item, { merge: true });
-  });
-  shoppingList.forEach(item => {
-    db.collection("shopping").doc(item.id).set(item, { merge: true });
-  });
-  recipes.forEach(rec => {
-    db.collection("recipes").doc(rec.id).set(rec, { merge: true });
-  });
+  inventory.forEach(i    => db.collection("inventory").doc(i.id).set(i,{merge:true}));
+  shoppingList.forEach(i => db.collection("shopping").doc(i.id).set(i,{merge:true}));
+  recipes.forEach(r      => db.collection("recipes").doc(r.id).set(r,{merge:true}));
 }
 
-// 6. Real-Time Listeners (Auto-sync cloud data to your local app)
-db.collection("inventory").onSnapshot((snapshot) => {
-    inventory = [];
-    snapshot.forEach((doc) => inventory.push(doc.data()));
-    renderInventory();
-    refreshDatalist();
-});
-
-db.collection("shopping").onSnapshot((snapshot) => {
-    shoppingList = [];
-    snapshot.forEach((doc) => shoppingList.push(doc.data()));
-    renderShopping();
-});
-
-db.collection("recipes").onSnapshot((snapshot) => {
-    recipes = [];
-    snapshot.forEach((doc) => recipes.push(doc.data()));
-    renderRecipes();
-});
-
-function uid() {
-  return Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
-}
-
-// ─── ONLINE STATUS ────────────────────────────────────────────────
+/* ══ Online status ══ */
+let isOnline = navigator.onLine;
 function updateOnlineStatus() {
   isOnline = navigator.onLine;
-  const dot  = document.getElementById('status-dot');
-  const text = document.getElementById('status-text');
-  if (isOnline) {
-    dot.classList.remove('offline');
-    text.textContent = 'Online';
-  } else {
-    dot.classList.add('offline');
-    text.textContent = 'Offline – data saved locally';
-  }
-  document.querySelectorAll('.mic-btn').forEach(btn => {
-    btn.disabled = !isOnline;
-  });
+  const dot = document.getElementById('status-dot');
+  const txt = document.getElementById('status-text');
+  dot.classList.toggle('offline', !isOnline);
+  txt.textContent = isOnline ? 'Online' : 'Offline – cached';
+  document.querySelectorAll('.mic-btn').forEach(b => b.disabled = !isOnline);
 }
-window.addEventListener('online',  updateOnlineStatus);
+window.addEventListener('online', updateOnlineStatus);
 window.addEventListener('offline', updateOnlineStatus);
 updateOnlineStatus();
 
-// ─── NAV & UI ─────────────────────────────────────────────────────
-function showView(id) {
+/* ══ Nav ══ */
+function showView(id, btn) {
   document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-  document.getElementById('view-' + id).classList.add('active');
-  event.currentTarget.classList.add('active');
-
-  if (id === 'inventory') renderInventory();
-  if (id === 'shopping')  renderShopping();
-  if (id === 'recipes')   renderRecipes();
+  document.querySelectorAll('.pnav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('view-'+id).classList.add('active');
+  if (btn) btn.classList.add('active');
+  window.scrollTo(0,0);
+  if (id === 'finance') { renderFinanceDashboard(); updateFinShopSync(); }
 }
+
+/* ══ Modal / Toast ══ */
+function openModal(id)  { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+document.querySelectorAll('.modal-overlay').forEach(o => o.addEventListener('click', e => { if(e.target===o) o.classList.remove('open'); }));
+document.addEventListener('keydown', e => { if(e.key==='Escape') document.querySelectorAll('.modal-overlay.open,.confirm-overlay.open').forEach(m=>m.classList.remove('open')); });
 
 function toast(msg, type='') {
   const el = document.createElement('div');
-  el.className = 'toast ' + type;
-  el.textContent = msg; 
+  el.className = 'toast '+type;
+  el.textContent = msg;
   document.getElementById('toast-container').appendChild(el);
-  setTimeout(() => el.remove(), 3000);
+  setTimeout(() => el.remove(), 3500);
 }
 
-function openModal(id)  { document.getElementById(id).classList.add('open'); }
-function closeModal(id) { document.getElementById(id).classList.remove('open'); }
-
-document.querySelectorAll('.modal-overlay').forEach(overlay => {
-  overlay.addEventListener('click', e => {
-    if (e.target === overlay) overlay.classList.remove('open');
-  });
-});
-
-// ═══════════════════════════════════════════════════════════════════
-// MODULE 1 — INVENTORY
-// ═══════════════════════════════════════════════════════════════════
-
+/* ══════════════════════════════════════════════════════════════════
+   MODULE 01 — INVENTORY
+══════════════════════════════════════════════════════════════════ */
 const CAT_COLORS = {
-  Produce: 'cat-produce', Dairy: 'cat-dairy', Protein: 'cat-protein',
-  Grain: 'cat-grain', Pantry: 'cat-pantry', Frozen: 'cat-frozen',
-  Cleaning: 'cat-cleaning', Laundry: 'cat-laundry', Household: 'cat-household',
-  'Personal Care': 'cat-personal', Other: 'cat-other'
+  Produce:'cat-produce',Dairy:'cat-dairy',Protein:'cat-protein',Grain:'cat-grain',
+  Pantry:'cat-pantry',Frozen:'cat-frozen',Cleaning:'cat-cleaning',Laundry:'cat-laundry',
+  Household:'cat-household','Personal Care':'cat-personal',Other:'cat-other'
 };
-
-function catClass(cat) {
-  return CAT_COLORS[cat] || 'cat-other';
-}
+function catClass(c) { return CAT_COLORS[c]||'cat-other'; }
 
 function openAddItemModal() {
   document.getElementById('item-modal-title').textContent = 'Add Inventory Item';
-  DOM.item.name.value = '';
-  DOM.item.qty.value = '';
-  DOM.item.unit.value = '';
-  DOM.item.price.value = '';
-  DOM.item.threshold.value = '';
-  DOM.item.cat.value = 'Grain';
-  DOM.item.id.value = '';
+  ['item-name','item-qty','item-unit','item-price','item-threshold'].forEach(id => document.getElementById(id).value='');
+  document.getElementById('item-cat').value = 'Grain';
+  document.getElementById('item-edit-id').value = '';
   openModal('item-modal');
-  setTimeout(() => DOM.item.name.focus(), 80);
+  setTimeout(()=>document.getElementById('item-name').focus(),80);
 }
-
 function openEditItemModal(id) {
-  const item = inventory.find(i => i.id === id);
-  if (!item) return;
+  const item = inventory.find(i=>i.id===id); if(!item) return;
   document.getElementById('item-modal-title').textContent = 'Edit Item';
-  DOM.item.name.value = item.name;
-  DOM.item.qty.value = item.qty;
-  DOM.item.unit.value = item.unit;
-  DOM.item.price.value = item.price || '';
-  DOM.item.threshold.value = item.threshold || '';
-  DOM.item.cat.value = item.category || 'Other';
-  DOM.item.id.value = id;
+  document.getElementById('item-name').value = item.name;
+  document.getElementById('item-qty').value = item.qty;
+  document.getElementById('item-unit').value = item.unit;
+  document.getElementById('item-price').value = item.price||'';
+  document.getElementById('item-threshold').value = item.threshold||'';
+  document.getElementById('item-cat').value = item.category||'Other';
+  document.getElementById('item-edit-id').value = id;
   openModal('item-modal');
 }
-
 function saveItem(e) {
-  if(e) e.preventDefault(); 
-  const name  = DOM.item.name.value.trim();
-  const qty   = parseFloat(DOM.item.qty.value);
-  const unit  = DOM.item.unit.value.trim();
-  const price = parseFloat(DOM.item.price.value) || 0;
-  const thr   = parseFloat(DOM.item.threshold.value) || 0;
-  const cat   = DOM.item.cat.value;
-  const editId= DOM.item.id.value;
-
-  if (editId) {
-    const idx = inventory.findIndex(i => i.id === editId);
-    if (idx >= 0) {
-      inventory[idx] = { ...inventory[idx], name, qty, unit, price, threshold: thr, category: cat, updated: Date.now() };
-      toast('Item updated.', 'success');
-    }
+  if(e) e.preventDefault();
+  const name=document.getElementById('item-name').value.trim();
+  const qty=parseFloat(document.getElementById('item-qty').value);
+  const unit=document.getElementById('item-unit').value.trim();
+  const price=parseFloat(document.getElementById('item-price').value)||0;
+  const thr=parseFloat(document.getElementById('item-threshold').value)||0;
+  const cat=document.getElementById('item-cat').value;
+  const editId=document.getElementById('item-edit-id').value;
+  if(editId) {
+    const idx=inventory.findIndex(i=>i.id===editId);
+    if(idx>=0){inventory[idx]={...inventory[idx],name,qty,unit,price,threshold:thr,category:cat,updated:Date.now()};toast('Item updated.','success');}
   } else {
-    inventory.push({ id: uid(), name, qty, unit, price, threshold: thr, category: cat, created: Date.now(), updated: Date.now() });
-    toast('Item added.', 'success');
+    inventory.push({id:uid(),name,qty,unit,price,threshold:thr,category:cat,created:Date.now(),updated:Date.now()});
+    toast('Item added.','success');
   }
-
-  persist();
-  closeModal('item-modal');
+  persist(); closeModal('item-modal');
 }
-
 function deleteItem(id) {
-  if (!confirm('Remove this item from inventory?')) return;
-  db.collection("inventory").doc(id).delete().then(() => {
-    toast('Item removed.');
-  }).catch(error => console.error("Error removing document: ", error));
+  if(!confirm('Remove this item?')) return;
+  db.collection("inventory").doc(id).delete().then(()=>toast('Item removed.'));
 }
-
 function openAdjustModal(id) {
-  const item = inventory.find(i => i.id === id);
-  if (!item) return;
-  DOM.adjust.nameDisplay.textContent = item.name; 
-  DOM.adjust.qty.value = item.qty;
-  DOM.adjust.unit.value = item.unit;
-  DOM.adjust.id.value = id;
+  const item=inventory.find(i=>i.id===id); if(!item) return;
+  document.getElementById('adjust-item-name').textContent=item.name;
+  document.getElementById('adjust-qty').value=item.qty;
+  document.getElementById('adjust-unit').value=item.unit;
+  document.getElementById('adjust-id').value=id;
   openModal('adjust-modal');
-  setTimeout(() => DOM.adjust.qty.focus(), 80);
+  setTimeout(()=>document.getElementById('adjust-qty').focus(),80);
 }
-
 function saveAdjust(e) {
   if(e) e.preventDefault();
-  const id  = DOM.adjust.id.value;
-  const qty = parseFloat(DOM.adjust.qty.value);
-  const idx = inventory.findIndex(i => i.id === id);
-  if (idx >= 0) {
-    inventory[idx].qty = qty;
-    inventory[idx].updated = Date.now();
-    persist();
-    toast('Quantity updated.', 'success');
-    closeModal('adjust-modal');
-  }
+  const id=document.getElementById('adjust-id').value;
+  const qty=parseFloat(document.getElementById('adjust-qty').value);
+  const idx=inventory.findIndex(i=>i.id===id);
+  if(idx>=0){inventory[idx].qty=qty;inventory[idx].updated=Date.now();persist();toast('Quantity updated.','success');closeModal('adjust-modal');}
 }
-
 function renderInventory() {
-  const search   = (document.getElementById('inv-search').value || '').toLowerCase();
-  const catFilt  = document.getElementById('inv-cat-filter').value;
-  const lowOnly  = document.getElementById('inv-low-only').checked;
-
-  let items = inventory.filter(item => {
-    const matchSearch = item.name.toLowerCase().includes(search) ||
-                        (item.category || '').toLowerCase().includes(search);
-    const matchCat  = !catFilt || item.category === catFilt;
-    const matchLow  = !lowOnly || (item.threshold > 0 && item.qty <= item.threshold);
-    return matchSearch && matchCat && matchLow;
+  const search=((document.getElementById('inv-search')||{}).value||'').toLowerCase();
+  const catFilt=(document.getElementById('inv-cat-filter')||{}).value||'';
+  const lowOnly=(document.getElementById('inv-low-only')||{}).checked||false;
+  let items=inventory.filter(i=>{
+    const ms=i.name.toLowerCase().includes(search)||(i.category||'').toLowerCase().includes(search);
+    const mc=!catFilt||i.category===catFilt;
+    const ml=!lowOnly||(i.threshold>0&&i.qty<=i.threshold);
+    return ms&&mc&&ml;
   });
-
-  const tbody = document.getElementById('inv-tbody');
-  const empty = document.getElementById('inv-empty');
-  tbody.innerHTML = '';
-
-  if (items.length === 0) {
-    empty.style.display = 'block';
-    tbody.style.display = 'none';
-  } else {
-    empty.style.display = 'none';
-    tbody.style.display = '';
-
-    items.forEach(item => {
-      const isLow = item.threshold > 0 && item.qty <= item.threshold && item.qty > 0;
-      const isOut = item.qty === 0;
-      const rowClass = isOut ? 'row-out' : isLow ? 'row-low' : '';
-
-      const statusBadge = isOut
-        ? '<span class="badge badge-danger">Out</span>'
-        : isLow
-          ? '<span class="badge badge-warn">Low</span>'
-          : '<span class="badge badge-green">OK</span>';
-
-      const tr = document.createElement('tr');
-      if (rowClass) tr.className = rowClass;
-      
-      tr.innerHTML = `
-        <td class="name" data-label="Item">
-          <span class="cat-dot ${catClass(item.category)}"></span>${sanitize(item.name)}
-        </td>
-        <td data-label="Category">${sanitize(item.category) || '—'}</td>
-        <td class="qty-cell" data-label="Quantity">${item.qty}</td>
+  const tbody=document.getElementById('inv-tbody');
+  const empty=document.getElementById('inv-empty');
+  if(!tbody) return;
+  tbody.innerHTML='';
+  if(items.length===0){empty.style.display='block';tbody.style.display='none';}
+  else {
+    empty.style.display='none';tbody.style.display='';
+    items.forEach(item=>{
+      const isLow=item.threshold>0&&item.qty<=item.threshold&&item.qty>0;
+      const isOut=item.qty===0;
+      const rowClass=isOut?'row-out':isLow?'row-low':'';
+      const statusBadge=isOut?'<span class="badge badge-danger">Out</span>':isLow?'<span class="badge badge-warn">Low</span>':'<span class="badge badge-green">OK</span>';
+      const tr=document.createElement('tr');
+      if(rowClass) tr.className=rowClass;
+      tr.innerHTML=`
+        <td class="name" data-label="Item"><span class="cat-dot ${catClass(item.category)}"></span>${sanitize(item.name)}</td>
+        <td data-label="Category">${sanitize(item.category)||'—'}</td>
+        <td class="qty-cell" data-label="Qty">${item.qty}</td>
         <td data-label="Unit">${sanitize(item.unit)}</td>
-        <td class="price-cell" data-label="Unit Price">${item.price ? '$' + Number(item.price).toFixed(2) : '—'}</td>
-        <td data-label="Threshold" style="font-family:var(--mono)">${item.threshold || '—'}</td>
+        <td class="price-cell" data-label="Price">${item.price?'$'+Number(item.price).toFixed(2):'—'}</td>
+        <td data-label="Threshold" style="font-family:var(--mono)">${item.threshold||'—'}</td>
         <td data-label="Status">${statusBadge}</td>
-        <td data-label="Actions">
-          <div style="display:flex;gap:.35rem;">
-            <button class="btn btn-ghost btn-icon btn-sm" title="Adjust qty" onclick="openAdjustModal('${item.id}')">±</button>
-            <button class="btn btn-ghost btn-icon btn-sm" title="Edit" onclick="openEditItemModal('${item.id}')">✎</button>
-            <button class="btn btn-danger btn-icon btn-sm" title="Delete" onclick="deleteItem('${item.id}')">✕</button>
-          </div>
-        </td>
-      `;
+        <td data-label="Actions"><div style="display:flex;gap:.3rem;">
+          <button class="btn btn-ghost btn-icon btn-sm" onclick="openAdjustModal('${item.id}')" title="Adjust">±</button>
+          <button class="btn btn-ghost btn-icon btn-sm" onclick="openEditItemModal('${item.id}')" title="Edit">✎</button>
+          <button class="btn btn-danger btn-icon btn-sm" onclick="deleteItem('${item.id}')" title="Delete">✕</button>
+        </div></td>`;
       tbody.appendChild(tr);
     });
   }
-
-  updateStats();
-  updateBadges();
+  updateStats(); updateBadges();
 }
-
 function updateStats() {
-  const total = inventory.length;
-  const low   = inventory.filter(i => i.threshold > 0 && i.qty <= i.threshold).length;
-  const value = inventory.reduce((s, i) => s + (i.qty * (i.price || 0)), 0);
-  const cats  = [...new Set(inventory.map(i => i.category).filter(Boolean))].length;
-
-  document.getElementById('stat-total').textContent = total;
-  document.getElementById('stat-low').textContent   = low;
-  document.getElementById('stat-value').textContent = '$' + value.toFixed(2);
-  document.getElementById('stat-cats').textContent  = cats;
+  const total=inventory.length;
+  const low=inventory.filter(i=>i.threshold>0&&i.qty<=i.threshold).length;
+  const value=inventory.reduce((s,i)=>s+(i.qty*(i.price||0)),0);
+  const cats=[...new Set(inventory.map(i=>i.category).filter(Boolean))].length;
+  document.getElementById('stat-total').textContent=total;
+  document.getElementById('stat-low').textContent=low;
+  document.getElementById('stat-value').textContent='$'+value.toFixed(2);
+  document.getElementById('stat-cats').textContent=cats;
 }
-
 function updateBadges() {
-  const lowCount  = inventory.filter(i => i.threshold > 0 && i.qty <= i.threshold).length;
-  const shopCount = shoppingList.filter(i => !i.checked).length;
-  const lowBadge  = document.getElementById('low-badge');
-  const shopBadge = document.getElementById('shop-badge');
-
-  if (lowCount > 0) { lowBadge.style.display='inline-flex'; lowBadge.textContent=lowCount; }
-  else { lowBadge.style.display = 'none'; }
-  if (shopCount > 0) { shopBadge.style.display='inline-flex'; shopBadge.textContent=shopCount; }
-  else { shopBadge.style.display = 'none'; }
+  const low=inventory.filter(i=>i.threshold>0&&i.qty<=i.threshold).length;
+  const shop=shoppingList.filter(i=>!i.checked).length;
+  const bills=transactions.filter(t=>t.type==='bill'&&!t.isPaid).length;
+  const lb=document.getElementById('low-badge'),sb=document.getElementById('shop-badge'),bb=document.getElementById('bills-badge');
+  lb.style.display=low>0?'inline-flex':'none'; lb.textContent=low;
+  sb.style.display=shop>0?'inline-flex':'none'; sb.textContent=shop;
+  bb.style.display=bills>0?'inline-flex':'none'; bb.textContent=bills;
+  // Update header balance
+  const {available} = calcFinanceTotals();
+  const hb = document.getElementById('header-balance');
+  hb.textContent = fmt$(available);
+  hb.className = 'amt' + (available < 0 ? ' neg' : '');
 }
 
-// ═══════════════════════════════════════════════════════════════════
-// MODULE 2 — SHOPPING LIST
-// ═══════════════════════════════════════════════════════════════════
-
+/* ══════════════════════════════════════════════════════════════════
+   MODULE 02 — SHOPPING LIST
+══════════════════════════════════════════════════════════════════ */
 function addShoppingItem(e) {
   if(e) e.preventDefault();
-  const name  = DOM.shop.name.value.trim();
-  const qty   = parseFloat(DOM.shop.qty.value) || 1;
-  const unit  = DOM.shop.unit.value.trim() || '';
-  const price = parseFloat(DOM.shop.price.value) || 0;
-
-  const invItem = inventory.find(i => i.name.toLowerCase() === name.toLowerCase());
-  const finalPrice = price || (invItem ? invItem.price : 0) || 0;
-
-  shoppingList.push({ id: uid(), name, qty, unit, price: finalPrice, checked: false, added: Date.now() });
+  const name=document.getElementById('sl-name').value.trim();
+  const qty=parseFloat(document.getElementById('sl-qty').value)||1;
+  const unit=document.getElementById('sl-unit').value.trim()||'';
+  const price=parseFloat(document.getElementById('sl-price').value)||0;
+  const invItem=inventory.find(i=>i.name.toLowerCase()===name.toLowerCase());
+  const finalPrice=price||(invItem?invItem.price:0)||0;
+  shoppingList.push({id:uid(),name,qty,unit,price:finalPrice,checked:false,added:Date.now()});
   persist();
-
-  DOM.shop.name.value  = '';
-  DOM.shop.qty.value   = '';
-  DOM.shop.unit.value  = '';
-  DOM.shop.price.value = '';
-  toast(sanitize(name) + ' added to list.', 'success');
+  document.getElementById('sl-name').value='';
+  document.getElementById('sl-qty').value='';
+  document.getElementById('sl-unit').value='';
+  document.getElementById('sl-price').value='';
+  toast(sanitize(name)+' added.','success');
 }
-
 function toggleCheck(id) {
-  const item = shoppingList.find(i => i.id === id);
-  if (item) { item.checked = !item.checked; persist(); }
+  const item=shoppingList.find(i=>i.id===id);
+  if(item){item.checked=!item.checked;persist();}
 }
-
-function removeShoppingItem(id) {
-  db.collection("shopping").doc(id).delete().catch(e => console.error(e));
-}
-
+function removeShoppingItem(id) { db.collection("shopping").doc(id).delete().catch(e=>console.error(e)); }
 function clearChecked() {
-  const checkedItems = shoppingList.filter(i => i.checked);
-  checkedItems.forEach(item => {
-      db.collection("shopping").doc(item.id).delete();
-  });
+  shoppingList.filter(i=>i.checked).forEach(i=>db.collection("shopping").doc(i.id).delete());
   toast('Checked items cleared.');
 }
-
 function syncLowStock() {
-  const lowItems = inventory.filter(i => i.threshold > 0 && i.qty <= i.threshold);
-  let added = 0;
-  lowItems.forEach(item => {
-    const alreadyIn = shoppingList.some(s => s.name.toLowerCase() === item.name.toLowerCase() && !s.checked);
-    if (!alreadyIn) {
-      const needed = Math.max(item.threshold * 2 - item.qty, 1);
-      shoppingList.push({ id: uid(), name: item.name, qty: needed, unit: item.unit, price: item.price || 0, checked: false, added: Date.now(), fromInventory: true });
+  const low=inventory.filter(i=>i.threshold>0&&i.qty<=i.threshold);
+  let added=0;
+  low.forEach(item=>{
+    const already=shoppingList.some(s=>s.name.toLowerCase()===item.name.toLowerCase()&&!s.checked);
+    if(!already){
+      const needed=Math.max(item.threshold*2-item.qty,1);
+      shoppingList.push({id:uid(),name:item.name,qty:needed,unit:item.unit,price:item.price||0,checked:false,added:Date.now(),fromInventory:true});
       added++;
     }
   });
-  persist(); 
-  toast(added ? `${added} low-stock item(s) added.` : 'All low-stock items already on list.', added ? 'success' : '');
+  persist();
+  toast(added?`${added} low-stock item(s) added.`:'All low-stock items already on list.',added?'success':'');
 }
-
 function updateActualPrice(e) {
   if(e) e.preventDefault();
-  const nameInput = document.getElementById('price-update-name');
-  const valInput  = document.getElementById('price-update-val');
-  const name = nameInput.value.trim();
-  const val  = parseFloat(valInput.value);
-
-  let updated = false;
-  inventory.forEach(item => {
-    if (item.name.toLowerCase() === name.toLowerCase()) {
-      item.price = val;
-      item.updated = Date.now();
-      updated = true;
-    }
-  });
-  shoppingList.forEach(item => {
-    if (item.name.toLowerCase() === name.toLowerCase()) { item.price = val; }
-  });
-
+  const nameEl=document.getElementById('price-update-name');
+  const valEl=document.getElementById('price-update-val');
+  const name=nameEl.value.trim(),val=parseFloat(valEl.value);
+  let updated=false;
+  inventory.forEach(i=>{ if(i.name.toLowerCase()===name.toLowerCase()){i.price=val;i.updated=Date.now();updated=true;} });
+  shoppingList.forEach(i=>{ if(i.name.toLowerCase()===name.toLowerCase()) i.price=val; });
   persist();
-  toast(updated ? `${sanitize(name)} price updated to $${val.toFixed(2)}.` : 'Item not found in inventory.', updated ? 'success' : 'warn');
-  nameInput.value = '';
-  valInput.value  = '';
+  toast(updated?`${sanitize(name)} price updated to $${val.toFixed(2)}.`:'Item not found in inventory.',updated?'success':'warn');
+  nameEl.value=''; valEl.value='';
 }
-
 function renderShopping() {
-  const container = document.getElementById('shopping-list-items');
-  const empty     = document.getElementById('shop-empty');
-  container.innerHTML = '';
-
-  if (shoppingList.length === 0) {
-    empty.style.display = 'block';
-  } else {
-    empty.style.display = 'none';
-    shoppingList.forEach(item => {
-      const div = document.createElement('div');
-      div.className = 'shopping-item' + (item.checked ? ' checked' : '');
-      const lineTotal = (item.price || 0) * (item.qty || 1);
-      div.innerHTML = `
-        <input type="checkbox" ${item.checked ? 'checked' : ''} onchange="toggleCheck('${item.id}')">
+  const container=document.getElementById('shopping-list-items');
+  const empty=document.getElementById('shop-empty');
+  if(!container) return;
+  container.innerHTML='';
+  if(shoppingList.length===0){empty.style.display='block';}
+  else {
+    empty.style.display='none';
+    shoppingList.forEach(item=>{
+      const div=document.createElement('div');
+      div.className='shopping-item'+(item.checked?' checked':'');
+      const lineTotal=(item.price||0)*(item.qty||1);
+      div.innerHTML=`
+        <input type="checkbox" ${item.checked?'checked':''} onchange="toggleCheck('${item.id}')">
         <span class="item-name">${sanitize(item.name)}</span>
-        <span class="item-qty">${item.qty} ${sanitize(item.unit) || ''}</span>
-        <span class="item-price">${lineTotal > 0 ? '$' + lineTotal.toFixed(2) : '—'}</span>
-        <button class="btn btn-danger btn-icon btn-sm" onclick="removeShoppingItem('${item.id}')" type="button">✕</button>
-      `;
+        <span class="item-qty">${item.qty} ${sanitize(item.unit)||''}</span>
+        <span class="item-price">${lineTotal>0?'$'+lineTotal.toFixed(2):'—'}</span>
+        <button class="btn btn-danger btn-icon btn-sm" onclick="removeShoppingItem('${item.id}')" type="button">✕</button>`;
       container.appendChild(div);
     });
   }
-
-  const total = shoppingList.reduce((s, i) => s + (i.price || 0) * (i.qty || 1), 0);
-  document.getElementById('shop-total').textContent = '$' + total.toFixed(2);
+  const total=shoppingList.reduce((s,i)=>s+(i.price||0)*(i.qty||1),0);
+  document.getElementById('shop-total').textContent='$'+total.toFixed(2);
   updateBadges();
+  updateFinShopSync();
 }
-
 function refreshDatalist() {
-  const dl = document.getElementById('inv-datalist');
-  if (!dl) return;
-  dl.innerHTML = '';
-  inventory.forEach(item => {
-    const opt = document.createElement('option');
-    opt.value = item.name; 
-    dl.appendChild(opt);
-  });
+  const dl=document.getElementById('inv-datalist'); if(!dl) return;
+  dl.innerHTML='';
+  inventory.forEach(i=>{ const o=document.createElement('option'); o.value=i.name; dl.appendChild(o); });
 }
 
-// ═══════════════════════════════════════════════════════════════════
-// MODULE 3 — RECIPES & SMART MISSING ITEM CART
-// ═══════════════════════════════════════════════════════════════════
-
-function openAddRecipeModal() {
-  DOM.recipe.name.value         = '';
-  DOM.recipe.servings.value     = '4';
-  DOM.recipe.time.value         = '';
-  DOM.recipe.cat.value          = 'Dinner';
-  DOM.recipe.ingredients.value  = '';
-  DOM.recipe.instructions.value = '';
-  DOM.recipe.smartPaste.value   = '';
-  document.getElementById('rec-url-import').value = '';
-  openModal('recipe-modal');
-  setTimeout(() => DOM.recipe.name.focus(), 80);
-}
-
-// ─── SMART URL IMPORT (FIREBASE CLOUD FUNCTIONS) ──────────────────
-async function importFromUrl() {
-  const urlInput = document.getElementById('rec-url-import').value.trim();
-  if (!urlInput) { 
-      toast('Please enter a URL first.', 'warn'); 
-      return; 
-  }
-
-  const btn = document.getElementById('btn-import-url');
-  btn.textContent = 'Importing...';
-  btn.disabled = true;
-
-  try {
-      const scrapeRecipe = firebase.functions().httpsCallable('scrapeRecipe');
-      const result = await scrapeRecipe({ url: urlInput });
-
-      if (result.data.success) {
-          const recipe = result.data.recipe;
-          
-          DOM.recipe.name.value = recipe.name || '';
-          
-          if (recipe.ingredients && Array.isArray(recipe.ingredients)) {
-              DOM.recipe.ingredients.value = recipe.ingredients.join('\n');
-          }
-          
-          if (recipe.instructions) {
-              let instText = '';
-              if (Array.isArray(recipe.instructions)) {
-                  instText = recipe.instructions.map((step, i) => {
-                      return typeof step === 'string' ? `${i + 1}. ${step}` : `${i + 1}. ${step.text || ''}`;
-                  }).join('\n\n');
-              } else {
-                  instText = recipe.instructions;
-              }
-              DOM.recipe.instructions.value = instText;
-          }
-          
-          toast('Recipe imported successfully!', 'success');
-          document.getElementById('rec-url-import').value = ''; 
-      } else {
-          toast(result.data.error || 'Could not find standard recipe data on that page.', 'warn');
-      }
-  } catch (error) {
-      console.error("Scraping error:", error);
-      toast('Error importing recipe. Ensure your Cloud Function is deployed.', 'danger');
-  } finally {
-      btn.textContent = 'Import';
-      btn.disabled = false;
-  }
-}
-
-// ─── SMART TEXT PARSER (Heuristic Sorting) ────────────────────────
-function parseRawRecipeText() {
-  const pasteArea = DOM.recipe.smartPaste;
-  const rawText = pasteArea.value.trim();
-
-  if (!rawText) {
-    toast('Please paste some text first.', 'warn');
-    return;
-  }
-
-  const unitRegex = /\b(cup|cups|c|tbsp|tsp|teaspoon|tablespoon|oz|ounce|lb|lbs|pound|g|gram|kg|ml|liter|clove|pinch|can|package|slice|piece|bottle|bottles|btl|roll|rolls|box|boxes|pump|pumps|scoop|scoops|drop|drops|spray|sprays|pad|pads|sheet|sheets|wipe|wipes|load|loads)\b/i;
-  const startsWithNumberRegex = /^[\d\u00BC-\u00BE\u2150-\u215E]/;
-
-  const lines = rawText.split('\n').map(line => line.trim()).filter(line => line.length > 0);
-  
-  let sortedItems = [];
-  let sortedInstructions = [];
-
-  lines.forEach(line => {
-    const lowerLine = line.toLowerCase();
-    if (lowerLine === 'ingredients' || lowerLine === 'instructions' || lowerLine === 'method' || lowerLine === 'directions' || lowerLine === 'items needed' || lowerLine === 'supplies') {
-      return; 
-    }
-
-    const hasUnit = unitRegex.test(line);
-    const startsWithNumber = startsWithNumberRegex.test(line);
-    
-    if ((startsWithNumber || hasUnit) && line.length < 100) {
-      sortedItems.push(line);
+/* ══ SHOPPING → FINANCE SYNC ══ */
+function updateFinShopSync() {
+  const checked = shoppingList.filter(i => i.checked);
+  const total = checked.reduce((s,i) => s+(i.price||0)*(i.qty||1), 0);
+  const banner = document.getElementById('fin-shop-sync-banner');
+  const ft = document.getElementById('shop-fin-total');
+  // shopping tab preview
+  if (ft) ft.textContent = '$'+total.toFixed(2);
+  // finance tab banner
+  if (banner) {
+    if (checked.length > 0) {
+      banner.style.display = 'flex';
+      document.getElementById('fin-checked-count').textContent = checked.length;
+      document.getElementById('fin-checked-total').textContent = '$'+total.toFixed(2);
     } else {
-      const cleanInstruction = line.replace(/^\d+[\.\)]\s*/, '');
-      sortedInstructions.push(cleanInstruction);
+      banner.style.display = 'none';
     }
-  });
-
-  if (sortedItems.length > 0) {
-    DOM.recipe.ingredients.value = sortedItems.join('\n');
   }
-  
-  if (sortedInstructions.length > 0) {
-    DOM.recipe.instructions.value = sortedInstructions.map((step, index) => `${index + 1}. ${step}`).join('\n\n');
-  }
-
-  pasteArea.value = '';
-  toast('Text sorted into required items and instructions!', 'success');
 }
 
+function logShoppingToFinance() {
+  const checked = shoppingList.filter(i => i.checked);
+  if (checked.length === 0) { toast('No checked items to log.', 'warn'); return; }
+  const total = checked.reduce((s,i) => s+(i.price||0)*(i.qty||1), 0);
+  const itemNames = checked.map(i => i.name).join(', ');
+  const date = new Date().toISOString().split('T')[0];
+  transactions.push({
+    id: uid(),
+    type: 'spend',
+    amount: parseFloat(total.toFixed(2)),
+    description: `Shopping: ${itemNames.length > 60 ? itemNames.slice(0,57)+'…' : itemNames}`,
+    date,
+    isPaid: true,
+    dueDate: null,
+    createdAt: new Date().toISOString(),
+    fromShopping: true
+  });
+  saveFinanceLocally();
+  toast(`$${total.toFixed(2)} logged as Spend in Finance ✓`, 'success');
+  // Optionally clear checked items
+  checked.forEach(i => db.collection("shopping").doc(i.id).delete());
+  updateFinShopSync();
+  renderFinanceDashboard();
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   MODULE 03 — MENU / RECIPES
+══════════════════════════════════════════════════════════════════ */
+function openAddRecipeModal() {
+  ['rec-name','rec-servings','rec-time','rec-ingredients','rec-instructions','rec-smart-paste'].forEach(id => { const el=document.getElementById(id); if(el) el.value=''; });
+  document.getElementById('rec-url-import').value='';
+  document.getElementById('rec-cat').value='Dinner';
+  openModal('recipe-modal');
+  setTimeout(()=>document.getElementById('rec-name').focus(),80);
+}
+async function importFromUrl() {
+  const urlInput=document.getElementById('rec-url-import').value.trim();
+  if(!urlInput){toast('Please enter a URL.','warn');return;}
+  const btn=document.getElementById('btn-import-url');
+  btn.textContent='Importing…';btn.disabled=true;
+  try {
+    const fn=firebase.functions().httpsCallable('scrapeRecipe');
+    const result=await fn({url:urlInput});
+    if(result.data.success){
+      const r=result.data.recipe;
+      document.getElementById('rec-name').value=r.name||'';
+      if(r.ingredients&&Array.isArray(r.ingredients)) document.getElementById('rec-ingredients').value=r.ingredients.join('\n');
+      if(r.instructions){
+        let inst='';
+        if(Array.isArray(r.instructions)) inst=r.instructions.map((s,i)=>`${i+1}. ${typeof s==='string'?s:s.text||''}`).join('\n\n');
+        else inst=r.instructions;
+        document.getElementById('rec-instructions').value=inst;
+      }
+      document.getElementById('rec-url-import').value='';
+      toast('Recipe imported!','success');
+    } else {toast(result.data.error||'Could not extract recipe data.','warn');}
+  } catch(err){toast('Error importing. Cloud function may not be deployed.','danger');}
+  finally{btn.textContent='Import';btn.disabled=false;}
+}
+function parseRawRecipeText() {
+  const raw=document.getElementById('rec-smart-paste').value.trim();
+  if(!raw){toast('Paste text first.','warn');return;}
+  const unitRx=/\b(cup|cups|c|tbsp|tsp|teaspoon|tablespoon|oz|ounce|lb|lbs|pound|g|gram|kg|ml|liter|clove|pinch|can|package|slice|piece|bottle|bottles|btl|roll|rolls|box|boxes|pump|pumps|scoop|scoops|drop|drops|spray|sprays|pad|pads|sheet|sheets|wipe|wipes|load|loads)\b/i;
+  const numRx=/^[\d\u00BC-\u00BE\u2150-\u215E]/;
+  const lines=raw.split('\n').map(l=>l.trim()).filter(l=>l.length>0);
+  let items=[],insts=[];
+  lines.forEach(line=>{
+    const ll=line.toLowerCase();
+    if(['ingredients','instructions','method','directions','items needed','supplies'].includes(ll)) return;
+    if((numRx.test(line)||unitRx.test(line))&&line.length<100) items.push(line);
+    else insts.push(line.replace(/^\d+[\.\)]\s*/,''));
+  });
+  if(items.length>0) document.getElementById('rec-ingredients').value=items.join('\n');
+  if(insts.length>0) document.getElementById('rec-instructions').value=insts.map((s,i)=>`${i+1}. ${s}`).join('\n\n');
+  document.getElementById('rec-smart-paste').value='';
+  toast('Text sorted into items and instructions!','success');
+}
 function saveRecipe(e) {
   if(e) e.preventDefault();
-  const name         = DOM.recipe.name.value.trim();
-  const servings     = parseInt(DOM.recipe.servings.value) || 4;
-  const time         = DOM.recipe.time.value.trim();
-  const cat          = DOM.recipe.cat.value;
-  const ingRaw       = DOM.recipe.ingredients.value.trim();
-  const instructions = DOM.recipe.instructions.value.trim();
-
-  const ingredients = parseIngredientLines(ingRaw);
-  
-  const newId = uid(); 
-
-  recipes.push({ id: newId, name, servings, time, category: cat, ingredients, instructions, created: Date.now() });
-  persist();
-  closeModal('recipe-modal');
-  
+  const name=document.getElementById('rec-name').value.trim();
+  const servings=parseInt(document.getElementById('rec-servings').value)||4;
+  const time=document.getElementById('rec-time').value.trim();
+  const cat=document.getElementById('rec-cat').value;
+  const ingRaw=document.getElementById('rec-ingredients').value.trim();
+  const instructions=document.getElementById('rec-instructions').value.trim();
+  const ingredients=parseIngredientLines(ingRaw);
+  const newId=uid();
+  recipes.push({id:newId,name,servings,time,category:cat,ingredients,instructions,created:Date.now()});
+  persist(); closeModal('recipe-modal');
   openRecipeDetail(newId);
-  toast('Plan saved! Review your inventory status.', 'success');
+  toast('Plan saved!','success');
 }
-
 function parseIngredientLines(raw) {
-  return raw.split('\n')
-    .map(l => l.trim())
-    .filter(Boolean)
-    .map(line => {
-      const parsed = parseSpokenItem(line);
-      return { raw: line, qty: parsed.qty, unit: parsed.unit, name: parsed.name || line };
-    });
-}
-
-function buildInventoryMap() {
-  const map = new Map();
-  inventory.forEach(i => map.set(i.name.toLowerCase(), i));
-  return map;
-}
-
-function calcRecipeCost(recipe, invMap) {
-  return recipe.ingredients.reduce((sum, ing) => {
-    const ingLower = ing.name.toLowerCase();
-    let match = invMap.get(ingLower);
-    
-    if (!match) {
-        for (const [key, item] of invMap.entries()) {
-            if (key.includes(ingLower) || ingLower.includes(key)) { match = item; break; }
-        }
-    }
-    
-    if (!match || !match.price) return sum;
-    return sum + (match.price * (ing.qty || 1));
-  }, 0);
-}
-
-function isRecipeAvailable(recipe, invMap) {
-  return recipe.ingredients.every(ing => {
-    const ingLower = ing.name.toLowerCase();
-    let match = invMap.get(ingLower);
-    
-    if (!match) {
-        for (const [key, item] of invMap.entries()) {
-            if (key.includes(ingLower) || ingLower.includes(key)) { match = item; break; }
-        }
-    }
-    return match && match.qty > 0;
+  return raw.split('\n').map(l=>l.trim()).filter(Boolean).map(line=>{
+    const p=parseSpokenItem(line);
+    return {raw:line,qty:p.qty,unit:p.unit,name:p.name||line};
   });
 }
-
+function buildInventoryMap() { const m=new Map(); inventory.forEach(i=>m.set(i.name.toLowerCase(),i)); return m; }
+function calcRecipeCost(rec,invMap) {
+  return rec.ingredients.reduce((sum,ing)=>{
+    const ll=ing.name.toLowerCase();
+    let match=invMap.get(ll);
+    if(!match) for(const[k,v] of invMap.entries()){if(k.includes(ll)||ll.includes(k)){match=v;break;}}
+    if(!match||!match.price) return sum;
+    return sum+(match.price*(ing.qty||1));
+  },0);
+}
+function isRecipeAvailable(rec,invMap) {
+  return rec.ingredients.every(ing=>{
+    const ll=ing.name.toLowerCase();
+    let match=invMap.get(ll);
+    if(!match) for(const[k,v] of invMap.entries()){if(k.includes(ll)||ll.includes(k)){match=v;break;}}
+    return match&&match.qty>0;
+  });
+}
 function toggleAvailableOnly() {
-  availableOnly = !availableOnly;
-  const btn = document.getElementById('show-available-btn');
-  btn.style.background = availableOnly ? 'var(--bamboo-lt)' : '';
-  btn.style.borderColor = availableOnly ? 'var(--bamboo)' : '';
-  btn.style.color = availableOnly ? 'var(--bamboo-dk)' : '';
+  availableOnly=!availableOnly;
+  const btn=document.getElementById('show-available-btn');
+  btn.style.background=availableOnly?'var(--surface-2)':'';
+  btn.style.borderColor=availableOnly?'var(--amber)':'var(--border-soft)';
+  btn.style.color=availableOnly?'var(--amber)':'var(--ink-2)';
   renderRecipes();
 }
-
 function renderRecipes() {
-  document.getElementById('recipe-list-view').style.display = 'block';
+  document.getElementById('recipe-list-view').style.display='block';
   document.getElementById('recipe-detail').classList.remove('active');
-
-  const invMap = buildInventoryMap(); 
-  let list = availableOnly ? recipes.filter(r => isRecipeAvailable(r, invMap)) : recipes;
-
-  const grid  = document.getElementById('recipe-grid');
-  const empty = document.getElementById('recipe-empty');
-  grid.innerHTML = '';
-
-  if (list.length === 0) {
-    empty.style.display = 'block';
-  } else {
-    empty.style.display = 'none';
-    list.forEach(rec => {
-      const cost = calcRecipeCost(rec, invMap);
-      const avail = isRecipeAvailable(rec, invMap);
-      const card = document.createElement('div');
-      card.className = 'recipe-card';
-      card.onclick = () => openRecipeDetail(rec.id, invMap);
-      
-      const safeIng = rec.ingredients.slice(0, 4).map(i => sanitize(i.raw)).join(' · ');
-      
-      card.innerHTML = `
+  const invMap=buildInventoryMap();
+  const list=availableOnly?recipes.filter(r=>isRecipeAvailable(r,invMap)):recipes;
+  const grid=document.getElementById('recipe-grid');
+  const empty=document.getElementById('recipe-empty');
+  if(!grid) return;
+  grid.innerHTML='';
+  if(list.length===0){empty.style.display='block';}
+  else {
+    empty.style.display='none';
+    list.forEach(rec=>{
+      const cost=calcRecipeCost(rec,invMap);
+      const avail=isRecipeAvailable(rec,invMap);
+      const card=document.createElement('div');
+      card.className='recipe-card';
+      card.onclick=()=>openRecipeDetail(rec.id,invMap);
+      const safeIng=rec.ingredients.slice(0,4).map(i=>sanitize(i.raw)).join(' · ');
+      card.innerHTML=`
         <div class="recipe-card-header">
           <h4>${sanitize(rec.name)}</h4>
           <div class="recipe-card-meta">
             <span class="badge badge-neutral">${sanitize(rec.category)}</span>
-            ${rec.time ? `<span class="badge badge-neutral">⏱ ${sanitize(rec.time)}</span>` : ''}
-            ${avail ? '<span class="badge badge-green">In Stock</span>' : '<span class="badge badge-warn">Missing Items</span>'}
+            ${rec.time?`<span class="badge badge-neutral">⏱ ${sanitize(rec.time)}</span>`:''}
+            ${avail?'<span class="badge badge-green">In Stock</span>':'<span class="badge badge-warn">Missing Items</span>'}
           </div>
         </div>
-        <div class="recipe-card-body">
-          <div class="ingredient-preview">${safeIng}${rec.ingredients.length > 4 ? ` · +${rec.ingredients.length - 4} more` : ''}</div>
-        </div>
+        <div class="recipe-card-body"><div class="ingredient-preview">${safeIng}${rec.ingredients.length>4?` · +${rec.ingredients.length-4} more`:''}</div></div>
         <div class="recipe-card-footer">
-          <span class="recipe-cost">Est. cost <span>${cost > 0 ? '$' + cost.toFixed(2) : '—'}</span></span>
-          <span style="font-family:var(--mono);font-size:.68rem;color:var(--ink-3)">${rec.ingredients.length} items</span>
-        </div>
-      `;
+          <span class="recipe-cost">Est. <span>${cost>0?'$'+cost.toFixed(2):'—'}</span></span>
+          <span style="font-family:var(--mono);font-size:.62rem;color:var(--ink-3)">${rec.ingredients.length} items</span>
+        </div>`;
       grid.appendChild(card);
     });
   }
 }
-
-function openRecipeDetail(id, invMap) {
-  if (!invMap) invMap = buildInventoryMap();
-  const rec = recipes.find(r => r.id === id);
-  if (!rec) return;
-  
-  currentRecipeId = id;
-  currentMissingIngredients = []; 
-
-  document.getElementById('rd-title').textContent = rec.name; 
-  document.getElementById('rd-cost').textContent = '$' + calcRecipeCost(rec, invMap).toFixed(2);
-
-  const meta = document.getElementById('rd-meta');
-  meta.innerHTML = `
+function openRecipeDetail(id,invMap) {
+  if(!invMap) invMap=buildInventoryMap();
+  const rec=recipes.find(r=>r.id===id); if(!rec) return;
+  currentRecipeId=id; currentMissingIngredients=[];
+  document.getElementById('rd-title').textContent=rec.name;
+  document.getElementById('rd-cost').textContent='$'+calcRecipeCost(rec,invMap).toFixed(2);
+  document.getElementById('rd-meta').innerHTML=`
     <span class="badge badge-neutral">${sanitize(rec.category)}</span>
-    ${rec.time ? `<span class="badge badge-neutral">⏱ ${sanitize(rec.time)}</span>` : ''}
-    ${rec.servings ? `<span class="badge badge-neutral">✦ Scale: ${rec.servings}</span>` : ''}
-  `;
-
-  const ingList = document.getElementById('rd-ingredients');
-  ingList.innerHTML = '';
-  
-  rec.ingredients.forEach(ing => {
-    const ingLower = ing.name.toLowerCase();
-    let match = invMap.get(ingLower);
-    
-    if (!match) {
-        for (const [key, item] of invMap.entries()) {
-            if (key.includes(ingLower) || ingLower.includes(key)) { match = item; break; }
-        }
-    }
-    
-    const inStock = match && match.qty >= (ing.qty || 1);
-    
-    // TRACK MISSING INGREDIENTS
-    if (!inStock) {
-      const missingQty = (ing.qty || 1) - (match ? match.qty : 0);
-      currentMissingIngredients.push({ ...ing, missingQty });
-    }
-
-    const li = document.createElement('li');
-    li.innerHTML = `
-      <span>
-        <span class="cat-dot" style="background:${inStock ? 'var(--bamboo)' : 'var(--warn)'}"></span>
-        <strong>${sanitize(ing.raw)}</strong>
-      </span>
-      <span>${match
-        ? `<span class="badge ${inStock ? 'badge-green' : 'badge-warn'}">
-            ${inStock ? '✓' : '⚠️'} ${match.qty} ${sanitize(match.unit)} on hand
-           </span>`
-        : '<span class="badge badge-danger">Not in inventory</span>'}
-      </span>
-    `;
+    ${rec.time?`<span class="badge badge-neutral">⏱ ${sanitize(rec.time)}</span>`:''}
+    ${rec.servings?`<span class="badge badge-neutral">✦ Scale: ${rec.servings}</span>`:''}`;
+  const ingList=document.getElementById('rd-ingredients');
+  ingList.innerHTML='';
+  rec.ingredients.forEach(ing=>{
+    const ll=ing.name.toLowerCase();
+    let match=invMap.get(ll);
+    if(!match) for(const[k,v] of invMap.entries()){if(k.includes(ll)||ll.includes(k)){match=v;break;}}
+    const inStock=match&&match.qty>=(ing.qty||1);
+    if(!inStock){ const mq=(ing.qty||1)-(match?match.qty:0); currentMissingIngredients.push({...ing,missingQty:mq}); }
+    const li=document.createElement('li');
+    li.innerHTML=`
+      <span><span class="cat-dot" style="background:${inStock?'var(--grove)':'var(--amber)'}"></span><strong>${sanitize(ing.raw)}</strong></span>
+      <span>${match?`<span class="badge ${inStock?'badge-green':'badge-warn'}">${inStock?'✓':'⚠'} ${match.qty} ${sanitize(match.unit)} on hand</span>`:'<span class="badge badge-danger">Not in inventory</span>'}</span>`;
     ingList.appendChild(li);
   });
-
-  // TOGGLE THE ALERT BANNER
-  const alertBar = document.getElementById('rd-missing-alert');
-  if (currentMissingIngredients.length > 0) {
-    document.getElementById('rd-missing-count').textContent = currentMissingIngredients.length;
-    alertBar.style.display = 'flex';
-  } else {
-    alertBar.style.display = 'none';
-  }
-
-  document.getElementById('rd-instructions').textContent = rec.instructions || 'No instructions provided.';
-
-  document.getElementById('recipe-list-view').style.display = 'none';
+  const alertBar=document.getElementById('rd-missing-alert');
+  if(currentMissingIngredients.length>0){document.getElementById('rd-missing-count').textContent=currentMissingIngredients.length;alertBar.style.display='flex';}
+  else alertBar.style.display='none';
+  document.getElementById('rd-instructions').textContent=rec.instructions||'No instructions provided.';
+  document.getElementById('recipe-list-view').style.display='none';
   document.getElementById('recipe-detail').classList.add('active');
 }
-
-// ─── ADD MISSING INGREDIENTS TO SHOPPING CART ─────────────────────
 function addMissingToCart() {
-  if (currentMissingIngredients.length === 0) return;
-  
-  let added = 0;
-  currentMissingIngredients.forEach(ing => {
-    const itemName = ing.name || ing.raw;
-    const alreadyIn = shoppingList.some(s => s.name.toLowerCase() === itemName.toLowerCase() && !s.checked);
-    
-    if (!alreadyIn) {
-      shoppingList.push({
-        id: uid(),
-        name: itemName,
-        qty: ing.missingQty || 1,
-        unit: ing.unit || '',
-        price: 0,
-        checked: false,
-        added: Date.now()
-      });
-      added++;
-    }
+  if(!currentMissingIngredients.length) return;
+  let added=0;
+  currentMissingIngredients.forEach(ing=>{
+    const n=ing.name||ing.raw;
+    const already=shoppingList.some(s=>s.name.toLowerCase()===n.toLowerCase()&&!s.checked);
+    if(!already){shoppingList.push({id:uid(),name:n,qty:ing.missingQty||1,unit:ing.unit||'',price:0,checked:false,added:Date.now()});added++;}
   });
+  if(added>0){persist();toast(`${added} missing item(s) added to Shopping List.`,'success');}
+  else toast('Already on your Shopping List.','');
+}
+function closeRecipeDetail() { currentRecipeId=null; document.getElementById('recipe-list-view').style.display='block'; document.getElementById('recipe-detail').classList.remove('active'); }
+function deleteCurrentRecipe() {
+  if(!currentRecipeId||!confirm('Delete this plan?')) return;
+  db.collection("recipes").doc(currentRecipeId).delete().then(()=>{closeRecipeDetail();toast('Plan deleted.');});
+}
+function printRecipe() { document.getElementById('recipe-detail').classList.add('active'); window.print(); }
 
-  if (added > 0) {
-    persist();
-    toast(`${added} missing item(s) added to Shopping List.`, 'success');
-  } else {
-    toast('Missing items are already on your Shopping List.', '');
+/* ══════════════════════════════════════════════════════════════════
+   MODULE 04 — FINANCE (Tight Ship)
+══════════════════════════════════════════════════════════════════ */
+function calcFinanceTotals() {
+  let income=0,spend=0,unpaid=0;
+  transactions.forEach(tx=>{
+    if(!tx) return;
+    const a=parseFloat(tx.amount)||0;
+    if(tx.type==='income') income+=a;
+    else if(tx.type==='spend') spend+=a;
+    else if(tx.type==='bill'){if(tx.isPaid) spend+=a; else unpaid+=a;}
+  });
+  return {income,spend,available:income-spend,unpaid};
+}
+
+function renderFinanceDashboard() {
+  const {income,spend,available,unpaid} = calcFinanceTotals();
+  // Balance card
+  const ba=document.getElementById('fin-balance-amount');
+  ba.textContent=fmt$(available);
+  ba.className='amount'+(available<0?' neg':'');
+  // Stats
+  document.getElementById('fin-income-total').textContent=fmt$(income);
+  document.getElementById('fin-spend-total').textContent=fmt$(spend);
+  // Unpaid bills
+  const unpaidBills=transactions.filter(t=>t.type==='bill'&&!t.isPaid);
+  document.getElementById('fin-unpaid-total').textContent=fmt$(unpaid);
+  const countEl=document.getElementById('fin-unpaid-count');
+  const barEl=document.getElementById('fin-unpaid-bar');
+  if(unpaidBills.length===0){countEl.textContent='None outstanding';barEl.classList.remove('has-bills');}
+  else{countEl.textContent=`${unpaidBills.length} bill${unpaidBills.length>1?'s':''} pending`;barEl.classList.add('has-bills');}
+  // Ledger
+  renderLedger();
+  updateBadges();
+  updateFinShopSync();
+  // Update masthead
+  const hb=document.getElementById('header-balance');
+  hb.textContent=fmt$(available);
+  hb.className='amt'+(available<0?' neg':'');
+}
+
+function renderLedger() {
+  const ledgerEl=document.getElementById('fin-ledger-list');
+  if(!ledgerEl) return;
+  const unpaid=transactions.filter(t=>t.type==='bill'&&!t.isPaid).sort((a,b)=>new Date(a.dueDate||0)-new Date(b.dueDate||0));
+  const paid=transactions.filter(t=>!(t.type==='bill'&&!t.isPaid)).sort((a,b)=>new Date(b.date||0)-new Date(a.date||0));
+  const ordered=[...unpaid,...paid].slice(0,40);
+  if(ordered.length===0){ledgerEl.innerHTML='<div class="empty-state"><div class="icon">◌</div><p>No transactions yet.</p></div>';return;}
+  ledgerEl.innerHTML='';
+  ordered.forEach(tx=>{
+    const isUnpaid=tx.type==='bill'&&!tx.isPaid;
+    const isPaidBill=tx.type==='bill'&&tx.isPaid;
+    let icon,amtColor,prefix,iconBg;
+    if(tx.type==='income'){icon='↑';amtColor='var(--fin-income)';prefix='+';iconBg='var(--grove-lt)';}
+    else if(tx.type==='spend'){icon='↓';amtColor='var(--fin-spend)';prefix='−';iconBg='var(--rose-lt)';}
+    else if(isPaidBill){icon='✓';amtColor='var(--ink-3)';prefix='−';iconBg='var(--surface-2)';}
+    else{icon='⏱';amtColor='var(--amber)';prefix='';iconBg='var(--amber-lt)';}
+    const daysAway=isUnpaid?daysDiff(new Date(),new Date(tx.dueDate)):null;
+    let dueBadge='';
+    if(isUnpaid){
+      let bc='badge-neutral',bt=`Due ${fmtDate(tx.dueDate)}`;
+      if(daysAway<0){bc='badge-danger';bt=`Overdue ${Math.abs(daysAway)}d`;}
+      else if(daysAway===0){bc='badge-danger';bt='Due today';}
+      else if(daysAway<=3){bc='badge-warn';bt=`Due in ${daysAway}d`;}
+      dueBadge=`<span class="badge ${bc}" style="margin-left:.4rem">${bt}</span>`;
+    }
+    const shopTag = tx.fromShopping ? '<span class="badge badge-sky" style="margin-left:.4rem">🛒 shopping</span>' : '';
+    const dateLabel=isUnpaid?`<span style="color:var(--ink-3)">Logged · unpaid</span>`:`<span style="color:var(--ink-3)">${fmtDate(tx.date)}${isPaidBill?' · paid bill':''}</span>`;
+    const payBtn=isUnpaid?`<button onclick="payBill('${tx.id}')" class="btn btn-fin btn-sm">✓ Pay</button>`:'';
+    const div=document.createElement('div');
+    div.className='ledger-item';
+    div.innerHTML=`
+      <div class="main-row">
+        <div class="item-icon" style="background:${iconBg};color:${amtColor};border:1px solid var(--border-soft);">${icon}</div>
+        <div class="item-info">
+          <div class="item-name">${sanitize(tx.description)}</div>
+          <div class="item-meta">${dateLabel}${dueBadge}${shopTag}</div>
+        </div>
+        <div class="item-amount" style="color:${amtColor}">${prefix}${fmt$(tx.amount)}</div>
+      </div>
+      <div class="actions">
+        ${payBtn}
+        <button onclick="editTx('${tx.id}')" class="btn btn-ghost btn-icon btn-sm" title="Edit">✎</button>
+        <button onclick="deleteTx('${tx.id}')" class="btn btn-danger btn-icon btn-sm" title="Delete">✕</button>
+      </div>`;
+    ledgerEl.appendChild(div);
+  });
+}
+
+function toggleLedger() {
+  const c=document.getElementById('ledger-container');
+  const ch=document.getElementById('ledger-chevron');
+  const open=c.style.display==='none'||c.style.display==='';
+  c.style.display=open?'block':'none';
+  ch.className='ledger-chevron'+(open?' open':'');
+}
+
+/* Finance form */
+function updateFinFormUI() {
+  const type=document.querySelector('input[name="txType"]:checked')?.value||'income';
+  const lblDesc=document.getElementById('lbl-description');
+  const lblDate=document.getElementById('lbl-date');
+  const billToggle=document.getElementById('bill-paid-toggle');
+  const btn=document.getElementById('btn-submit-tx');
+  billToggle.style.display='none';
+  document.getElementById('field-due-date').style.display='none';
+  document.getElementById('field-date').style.display='flex';
+  document.getElementById('tx-due-date').required=false;
+  document.getElementById('tx-date').required=true;
+  if(type==='income'){lblDesc.textContent='Source';lblDate.textContent='Date Received';document.getElementById('tx-description').placeholder='e.g. Salary, Freelance';btn.textContent=editingTxId?'Update Income':'Save Income';}
+  else if(type==='spend'){lblDesc.textContent='Vendor';lblDate.textContent='Date Spent';document.getElementById('tx-description').placeholder='e.g. Grocery Store';btn.textContent=editingTxId?'Update Spend':'Save Spend';}
+  else if(type==='bill'){lblDesc.textContent='Biller';document.getElementById('tx-description').placeholder='e.g. Electricity Co.';billToggle.style.display='flex';btn.textContent=editingTxId?'Update Bill':'Save Bill';syncBillDateLabel();}
+}
+function toggleBillPaid() {
+  const cb=document.getElementById('tx-is-paid');
+  cb.checked=!cb.checked;
+  syncBillPaidUI(cb.checked);
+  syncBillDateLabel();
+}
+function syncBillPaidUI(paid) {
+  const row=document.getElementById('bill-paid-toggle');
+  const icon=document.getElementById('bill-paid-icon');
+  const text=document.getElementById('bill-paid-text');
+  const sub=document.getElementById('bill-paid-sub');
+  if(paid){icon.textContent='✅';text.textContent='I have already paid this';text.style.color='var(--sky)';sub.style.color='var(--sky)';row.className='bill-toggle-row';}
+  else{icon.textContent='⏱';text.textContent='This is unpaid / due soon';text.style.color='var(--rose)';sub.style.color='var(--rose)';row.className='bill-toggle-row unpaid';}
+}
+function syncBillDateLabel() {
+  const paid=document.getElementById('tx-is-paid').checked;
+  if(paid){document.getElementById('field-due-date').style.display='none';document.getElementById('field-date').style.display='flex';document.getElementById('tx-due-date').required=false;document.getElementById('tx-date').required=true;}
+  else{document.getElementById('field-due-date').style.display='flex';document.getElementById('field-date').style.display='none';document.getElementById('tx-due-date').required=true;document.getElementById('tx-date').required=false;}
+}
+function handleLogTransaction(e) {
+  e.preventDefault();
+  const btn=document.getElementById('btn-submit-tx');
+  btn.textContent='Saving…';btn.disabled=true;
+  setTimeout(()=>{
+    const type=document.querySelector('input[name="txType"]:checked').value;
+    const amount=parseFloat(document.getElementById('tx-amount').value);
+    const description=document.getElementById('tx-description').value.trim();
+    let date=document.getElementById('tx-date').value;
+    let isPaid=true,dueDate=null;
+    if(type==='bill'){isPaid=document.getElementById('tx-is-paid').checked;if(!isPaid){dueDate=document.getElementById('tx-due-date').value;date=null;}}
+    if(isNaN(amount)||amount<=0){toast('Enter a valid amount.','danger');btn.textContent='Save';btn.disabled=false;return;}
+    if(!description){toast('Description required.','danger');btn.textContent='Save';btn.disabled=false;return;}
+    const wasEdit=!!editingTxId;
+    if(editingTxId){
+      const idx=transactions.findIndex(t=>t.id===editingTxId);
+      if(idx>-1) transactions[idx]={...transactions[idx],type,amount,description,date,isPaid,dueDate,updatedAt:new Date().toISOString()};
+    } else {
+      transactions.push({id:uid(),type,amount,description,date,isPaid,dueDate,createdAt:new Date().toISOString()});
+    }
+    saveFinanceLocally();
+    btn.textContent='✓ Saved!';
+    setTimeout(()=>{
+      cancelEdit();
+      showView('finance', document.querySelector('.pnav-btn:nth-child(4)'));
+      toast(wasEdit?'Transaction updated.':'Logged successfully.','success');
+    },700);
+  },150);
+}
+function editTx(id) {
+  const tx=transactions.find(t=>t.id===id); if(!tx) return;
+  editingTxId=id;
+  document.querySelector(`input[name="txType"][value="${tx.type}"]`).checked=true;
+  updateFinFormUI();
+  document.getElementById('tx-amount').value=tx.amount;
+  document.getElementById('tx-description').value=tx.description;
+  if(tx.type==='bill'){document.getElementById('tx-is-paid').checked=tx.isPaid;syncBillPaidUI(tx.isPaid);syncBillDateLabel();if(tx.isPaid) document.getElementById('tx-date').value=tx.date;else document.getElementById('tx-due-date').value=tx.dueDate;}
+  else document.getElementById('tx-date').value=tx.date;
+  document.getElementById('btn-submit-tx').textContent='Update Transaction';
+  document.getElementById('btn-cancel-edit').style.display='';
+  showView('log-tx', document.querySelector('.pnav-btn:nth-child(5)'));
+}
+function cancelEdit() {
+  editingTxId=null;
+  document.getElementById('fin-tx-form').reset();
+  document.getElementById('tx-date').value=new Date().toISOString().split('T')[0];
+  document.getElementById('tx-is-paid').checked=true;
+  syncBillPaidUI(true);
+  updateFinFormUI();
+  document.getElementById('btn-cancel-edit').style.display='none';
+  document.getElementById('btn-submit-tx').disabled=false;
+  document.getElementById('btn-submit-tx').textContent='Save Transaction';
+}
+function deleteTx(id) {
+  if(!confirm('Delete this transaction?')) return;
+  transactions=transactions.filter(t=>t.id!==id);
+  saveFinanceLocally();
+  toast('Transaction deleted.','');
+}
+function payBill(id) {
+  const tx=transactions.find(t=>t.id===id);
+  if(tx){tx.isPaid=true;tx.date=new Date().toISOString().split('T')[0];tx.dueDate=null;saveFinanceLocally();toast('Bill marked as paid!','success');}
+}
+function saveFinanceLocally() {
+  localStorage.setItem('tightShipTransactions',JSON.stringify(transactions));
+  renderFinanceDashboard();
+  updateBadges();
+}
+
+/* Finance settings */
+function downloadCSV() {
+  if(!transactions.length){toast('No data to export.','warn');return;}
+  let csv="Date,Type,Description,Amount,Status\n";
+  transactions.forEach(tx=>{
+    const d=tx.date||(tx.isPaid?'':tx.dueDate)||'';
+    const status=tx.type==='bill'?(tx.isPaid?'Paid':'Unpaid'):'Completed';
+    csv+=`${d},${tx.type},"${(tx.description||'').replace(/"/g,'""')}",${tx.amount},${status}\n`;
+  });
+  const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;a.download='hq-finance-ledger.csv';
+  document.body.appendChild(a);a.click();document.body.removeChild(a);
+  toast('Finance ledger exported.','success');
+}
+function shareApp() {
+  if(navigator.share) navigator.share({title:'HQ Command Centre',url:window.location.href}).catch(()=>{});
+  else {
+    navigator.clipboard.writeText(window.location.href).then(()=>toast('Link copied!','success')).catch(()=>{});
   }
 }
-
-function closeRecipeDetail() {
-  currentRecipeId = null;
-  document.getElementById('recipe-list-view').style.display = 'block';
-  document.getElementById('recipe-detail').classList.remove('active');
+function promptWipeFinance() {
+  document.getElementById('wipe-overlay').classList.add('open');
+}
+function closeConfirm() {
+  document.getElementById('wipe-overlay').classList.remove('open');
+}
+function executeWipeFinance() {
+  transactions=[];
+  localStorage.removeItem('tightShipTransactions');
+  saveFinanceLocally();
+  closeConfirm();
+  toast('Finance data wiped.','success');
 }
 
-function deleteCurrentRecipe() {
-  if (!currentRecipeId) return;
-  if (!confirm('Delete this plan?')) return;
-  db.collection("recipes").doc(currentRecipeId).delete().then(() => {
-      closeRecipeDetail();
-      toast('Plan deleted.');
-  });
-}
-
-function printRecipe() {
-  document.getElementById('recipe-detail').classList.add('active');
-  window.print();
-}
-
-// ═══════════════════════════════════════════════════════════════════
-// MODULE 4 — VOICE INPUT & SMART PARSING
-// ═══════════════════════════════════════════════════════════════════
-
-const SPOKEN_NUMBERS = {
-  'zero':0,'one':1,'two':2,'three':3,'four':4,'five':5,'six':6,'seven':7,
-  'eight':8,'nine':9,'ten':10,'eleven':11,'twelve':12,'thirteen':13,
-  'fourteen':14,'fifteen':15,'sixteen':16,'seventeen':17,'eighteen':18,
-  'nineteen':19,'twenty':20,'thirty':30,'forty':40,'fifty':50,'sixty':60,
-  'seventy':70,'eighty':80,'ninety':90,'hundred':100,'a':1,'an':1,'half':.5,
-  'quarter':.25,'dozen':12
-};
-
-const UNIT_ALIASES = {
-  'pound':'lbs','pounds':'lbs','lb':'lbs','lbs':'lbs',
-  'ounce':'oz','ounces':'oz','oz':'oz',
-  'kilogram':'kg','kilograms':'kg','kg':'kg','kilo':'kg','kilos':'kg',
-  'gram':'g','grams':'g','g':'g',
-  'liter':'L','liters':'L','litre':'L','litres':'L','l':'L',
-  'milliliter':'ml','milliliters':'ml','ml':'ml',
-  'cup':'cups','cups':'cups','c':'cups',
-  'tablespoon':'tbsp','tablespoons':'tbsp','tbsp':'tbsp','tbs':'tbsp',
-  'teaspoon':'tsp','teaspoons':'tsp','tsp':'tsp',
-  'can':'cans','cans':'cans','tin':'cans','tins':'cans',
-  'bag':'bags','bags':'bags','pack':'packs','packs':'packs',
-  'bottle':'bottles','bottles':'bottles','btl':'bottles','btls':'bottles',
-  'box':'boxes','boxes':'boxes','carton':'cartons','cartons':'cartons',
-  'gallon':'gal','gallons':'gal','quart':'qt','quarts':'qt',
-  'pint':'pt','pints':'pt','bunch':'bunches','bunches':'bunches',
-  'head':'heads','heads':'heads','clove':'cloves','cloves':'cloves',
-  'slice':'slices','slices':'slices','piece':'pieces','pieces':'pieces',
-  'roll':'rolls','rolls':'rolls','loaf':'loaves','loaves':'loaves',
-  'pump':'pumps','pumps':'pumps',
-  'scoop':'scoops','scoops':'scoops',
-  'drop':'drops','drops':'drops',
-  'spray':'sprays','sprays':'sprays',
-  'wipe':'wipes','wipes':'wipes',
-  'pad':'pads','pads':'pads',
-  'sheet':'sheets','sheets':'sheets',
-  'load':'loads','loads':'loads',
-  'dozen':'dozen','half':'half',
-};
+/* ══════════════════════════════════════════════════════════════════
+   MODULE VOICE — VOICE INPUT & PARSING
+══════════════════════════════════════════════════════════════════ */
+const SPOKEN_NUMBERS = {zero:0,one:1,two:2,three:3,four:4,five:5,six:6,seven:7,eight:8,nine:9,ten:10,eleven:11,twelve:12,thirteen:13,fourteen:14,fifteen:15,sixteen:16,seventeen:17,eighteen:18,nineteen:19,twenty:20,thirty:30,forty:40,fifty:50,sixty:60,seventy:70,eighty:80,ninety:90,hundred:100,a:1,an:1,half:.5,quarter:.25,dozen:12};
+const UNIT_ALIASES = {pound:'lbs',pounds:'lbs',lb:'lbs',lbs:'lbs',ounce:'oz',ounces:'oz',oz:'oz',kilogram:'kg',kilograms:'kg',kg:'kg',kilo:'kg',kilos:'kg',gram:'g',grams:'g',g:'g',liter:'L',liters:'L',litre:'L',litres:'L',l:'L',milliliter:'ml',milliliters:'ml',ml:'ml',cup:'cups',cups:'cups',c:'cups',tablespoon:'tbsp',tablespoons:'tbsp',tbsp:'tbsp',tbs:'tbsp',teaspoon:'tsp',teaspoons:'tsp',tsp:'tsp',can:'cans',cans:'cans',tin:'cans',tins:'cans',bag:'bags',bags:'bags',pack:'packs',packs:'packs',bottle:'bottles',bottles:'bottles',btl:'bottles',btls:'bottles',box:'boxes',boxes:'boxes',carton:'cartons',cartons:'cartons',gallon:'gal',gallons:'gal',quart:'qt',quarts:'qt',pint:'pt',pints:'pt',bunch:'bunches',bunches:'bunches',head:'heads',heads:'heads',clove:'cloves',cloves:'cloves',slice:'slices',slices:'slices',piece:'pieces',pieces:'pieces',roll:'rolls',rolls:'rolls',loaf:'loaves',loaves:'loaves',pump:'pumps',pumps:'pumps',scoop:'scoops',scoops:'scoops',drop:'drops',drops:'drops',spray:'sprays',sprays:'sprays',wipe:'wipes',wipes:'wipes',pad:'pads',pads:'pads',sheet:'sheets',sheets:'sheets',load:'loads',loads:'loads',dozen:'dozen',half:'half'};
 
 function parseSpokenItem(raw) {
-  if (!raw) return { qty: 1, unit: '', name: '' };
-
-  let text = raw.toLowerCase().trim();
-  text = text.replace(/\b(add|get|buy|pick up|some|of|the|a|an|i|used|use)\b/g, ' ').replace(/\s+/g, ' ').trim();
-
-  let qty  = 1;
-  let unit = '';
-  let name = '';
-
-  const numericMatch = text.match(/^(\d+(?:\.\d+)?(?:\/\d+)?)\s*/);
-  if (numericMatch) {
-    qty  = parseFraction(numericMatch[1]);
-    text = text.slice(numericMatch[0].length).trim();
-  } else {
-    const words  = text.split(' ');
-    let total    = 0;
-    let consumed = 0;
-    for (let i = 0; i < Math.min(words.length, 3); i++) {
-      const n = SPOKEN_NUMBERS[words[i]];
-      if (n !== undefined) { total += n; consumed = i + 1; }
-      else break;
-    }
-    if (consumed > 0) { qty = total || 1; text = words.slice(consumed).join(' ').trim(); }
+  if(!raw) return {qty:1,unit:'',name:''};
+  let text=raw.toLowerCase().trim().replace(/\b(add|get|buy|pick up|some|of|the|a|an|i|used|use)\b/g,' ').replace(/\s+/g,' ').trim();
+  let qty=1,unit='',name='';
+  const numericMatch=text.match(/^(\d+(?:\.\d+)?(?:\/\d+)?)\s*/);
+  if(numericMatch){qty=parseFraction(numericMatch[1]);text=text.slice(numericMatch[0].length).trim();}
+  else{
+    const words=text.split(' ');let total=0,consumed=0;
+    for(let i=0;i<Math.min(words.length,3);i++){const n=SPOKEN_NUMBERS[words[i]];if(n!==undefined){total+=n;consumed=i+1;}else break;}
+    if(consumed>0){qty=total||1;text=words.slice(consumed).join(' ').trim();}
   }
-
-  const words2    = text.split(' ');
-  const unitAlias = UNIT_ALIASES[words2[0]];
-  if (unitAlias !== undefined) {
-    unit = unitAlias;
-    text = words2.slice(1).join(' ').trim();
-  }
-
-  name = text.trim();
-  name = name.replace(/\b\w/g, c => c.toUpperCase());
-
-  return { qty, unit, name };
+  const words2=text.split(' ');
+  const ua=UNIT_ALIASES[words2[0]];
+  if(ua!==undefined){unit=ua;text=words2.slice(1).join(' ').trim();}
+  name=text.trim().replace(/\b\w/g,c=>c.toUpperCase());
+  return {qty,unit,name};
 }
 
-let recognition = null;
-let voiceTarget = null;
-
+let recognition=null,voiceTarget=null;
 function startVoice(target) {
-  if (!isOnline) { toast('Voice input requires an internet connection.', 'warn'); return; }
-
-  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-  if (!SpeechRecognition) {
-    toast('Your browser does not support voice input.', 'warn');
-    return;
-  }
-
-  voiceTarget = target;
-  
-  let micBtn, statusEl;
-  if (target === 'use') {
-    statusEl = document.getElementById('universal-voice-status');
-  } else {
-    micBtn = document.getElementById(target === 'inventory' ? 'inv-mic-btn' : 'sl-mic-btn');
-    statusEl = document.getElementById(target === 'inventory' ? 'inv-voice-status' : 'sl-voice-status');
-  }
-
-  if (recognition) {
-    recognition.abort();
-    recognition = null;
-    if(micBtn) micBtn.classList.remove('listening');
-    statusEl.textContent = '';
-    return;
-  }
-
-  recognition = new SpeechRecognition();
-  recognition.lang = 'en-US';
-  recognition.interimResults = false;
-  recognition.maxAlternatives = 1;
-
+  if(!isOnline){toast('Voice requires internet connection.','warn');return;}
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!SR){toast('Voice input not supported in this browser.','warn');return;}
+  voiceTarget=target;
+  let micBtn,statusEl;
+  if(target==='use') statusEl=document.getElementById('universal-voice-status');
+  else{micBtn=document.getElementById(target==='inventory'?'inv-mic-btn':'sl-mic-btn');statusEl=document.getElementById(target==='inventory'?'inv-voice-status':'sl-voice-status');}
+  if(recognition){recognition.abort();recognition=null;if(micBtn) micBtn.classList.remove('listening');if(statusEl) statusEl.textContent='';return;}
+  recognition=new SR();recognition.lang='en-US';recognition.interimResults=false;recognition.maxAlternatives=1;
   if(micBtn) micBtn.classList.add('listening');
-  statusEl.textContent = target === 'use' ? '🎤 Listening... say "I used two rolls of paper towels"' : 'Listening...';
-
-  recognition.onresult = (event) => {
-    const transcript = event.results[0][0].transcript;
-    statusEl.textContent = `"${transcript}"`;
-    applyVoiceInput(target, transcript);
-    setTimeout(() => { statusEl.textContent = ''; }, 4000);
+  if(statusEl) statusEl.textContent=target==='use'?'🎤 Say "I used 2 rolls of paper towels"':'Listening…';
+  recognition.onresult=e=>{
+    const t=e.results[0][0].transcript;
+    if(statusEl) statusEl.textContent=`"${t}"`;
+    applyVoiceInput(target,t);
+    setTimeout(()=>{if(statusEl) statusEl.textContent='';},4000);
   };
-
-  recognition.onerror = (event) => {
-    if (event.error === 'not-allowed') {
-      toast('Microphone permission denied.', 'warn');
-    } else if (event.error !== 'aborted') {
-      toast('Voice recognition error: ' + event.error, 'warn');
-    }
-    statusEl.textContent = '';
+  recognition.onerror=e=>{
+    if(e.error!=='aborted') toast('Voice error: '+e.error,'warn');
+    if(statusEl) statusEl.textContent='';
     if(micBtn) micBtn.classList.remove('listening');
-    recognition = null;
+    recognition=null;
   };
-
-  recognition.onend = () => {
-    if(micBtn) micBtn.classList.remove('listening');
-    recognition = null;
-  };
-
-  try {
-    recognition.start();
-  } catch(e) {
-    toast('Could not start voice input.', 'warn');
-    if(micBtn) micBtn.classList.remove('listening');
-    statusEl.textContent = '';
-    recognition = null;
-  }
+  recognition.onend=()=>{if(micBtn) micBtn.classList.remove('listening');recognition=null;};
+  try{recognition.start();}catch(e){toast('Could not start voice.','warn');if(micBtn)micBtn.classList.remove('listening');recognition=null;}
 }
-
-function applyVoiceInput(target, transcript) {
-  const parsed = parseSpokenItem(transcript);
-
-  if (target === 'use') {
-    if (!parsed.name) {
-      toast('Could not understand item name.', 'warn');
-      return;
-    }
-    
-    const nameLower = parsed.name.toLowerCase();
-    let match = inventory.find(i => i.name.toLowerCase() === nameLower);
-    
-    if (!match) {
-        match = inventory.find(i => i.name.toLowerCase().includes(nameLower) || nameLower.includes(i.name.toLowerCase()));
-    }
-
-    if (match) {
-      const oldQty = match.qty;
-      match.qty = Math.max(0, match.qty - parsed.qty);
-      match.updated = Date.now();
-      persist();
-      toast(`Logged usage: Deducted ${parsed.qty} from ${sanitize(match.name)}.`, 'success');
-      
-      if (match.threshold > 0 && match.qty <= match.threshold && oldQty > match.threshold) {
-         toast(`⚠️ ${sanitize(match.name)} is now low! Consider syncing your shopping list.`, 'warn');
-      }
-    } else {
-      toast(`Could not find "${sanitize(parsed.name)}" in your inventory to deduct.`, 'danger');
-    }
+function applyVoiceInput(target,transcript) {
+  const p=parseSpokenItem(transcript);
+  if(target==='use'){
+    if(!p.name){toast('Could not understand item name.','warn');return;}
+    const nl=p.name.toLowerCase();
+    let match=inventory.find(i=>i.name.toLowerCase()===nl)||inventory.find(i=>i.name.toLowerCase().includes(nl)||nl.includes(i.name.toLowerCase()));
+    if(match){
+      const old=match.qty;match.qty=Math.max(0,match.qty-p.qty);match.updated=Date.now();persist();
+      toast(`Deducted ${p.qty} from ${sanitize(match.name)}.`, 'success');
+      if(match.threshold>0&&match.qty<=match.threshold&&old>match.threshold) toast(`⚠ ${sanitize(match.name)} is now low!`,'warn');
+    } else toast(`"${sanitize(p.name)}" not found in inventory.`,'danger');
     return;
   }
-
-  if (target === 'inventory') {
-    if (parsed.name) DOM.item.name.value = parsed.name;
-    if (parsed.qty !== 1 || transcript.match(/\d/)) DOM.item.qty.value = parsed.qty;
-    if (parsed.unit) DOM.item.unit.value = parsed.unit;
-    toast(`Parsed: "${parsed.qty} ${sanitize(parsed.unit)} ${sanitize(parsed.name)}"`, 'success');
-  } else if (target === 'shopping') {
-    if (parsed.name) DOM.shop.name.value  = parsed.name;
-    if (parsed.qty !== 1 || transcript.match(/\d/)) DOM.shop.qty.value = parsed.qty;
-    if (parsed.unit) DOM.shop.unit.value  = parsed.unit;
-
-    const invItem = inventory.find(i => i.name.toLowerCase().includes(parsed.name.toLowerCase()) ||
-                                        parsed.name.toLowerCase().includes(i.name.toLowerCase()));
-    if (invItem && invItem.price) DOM.shop.price.value = invItem.price;
-
-    toast(`Parsed: "${parsed.qty} ${sanitize(parsed.unit)} ${sanitize(parsed.name)}"`, 'success');
+  if(target==='inventory'){
+    if(p.name) document.getElementById('item-name').value=p.name;
+    if(p.qty!==1||transcript.match(/\d/)) document.getElementById('item-qty').value=p.qty;
+    if(p.unit) document.getElementById('item-unit').value=p.unit;
+    toast(`Parsed: ${p.qty} ${sanitize(p.unit)} ${sanitize(p.name)}`,'success');
+  } else if(target==='shopping'){
+    if(p.name) document.getElementById('sl-name').value=p.name;
+    if(p.qty!==1||transcript.match(/\d/)) document.getElementById('sl-qty').value=p.qty;
+    if(p.unit) document.getElementById('sl-unit').value=p.unit;
+    const inv=inventory.find(i=>i.name.toLowerCase().includes(p.name.toLowerCase())||p.name.toLowerCase().includes(i.name.toLowerCase()));
+    if(inv&&inv.price) document.getElementById('sl-price').value=inv.price;
+    toast(`Parsed: ${p.qty} ${sanitize(p.unit)} ${sanitize(p.name)}`,'success');
   }
 }
 
-document.addEventListener('keydown', e => {
-  if (e.key === 'Escape') {
-    document.querySelectorAll('.modal-overlay.open').forEach(m => m.classList.remove('open'));
-  }
-});
-
-// ─── INIT ─────────────────────────────────────────────────────────
-(function init() {
+/* ══════════════════════════════════════════════════════════════════
+   INIT
+══════════════════════════════════════════════════════════════════ */
+(function init(){
+  // Set today's date for finance form
+  const today=new Date().toISOString().split('T')[0];
+  document.getElementById('tx-date').value=today;
+  document.getElementById('tx-due-date').value=today;
+  // Init finance form
+  updateFinFormUI();
+  syncBillPaidUI(true);
+  // Render pantry data (firebase listeners handle it, but init empty states)
   renderInventory();
   renderShopping();
   renderRecipes();
   refreshDatalist();
+  // Render finance
+  renderFinanceDashboard();
+  updateBadges();
+  // Check for existing finance data and update masthead
+  const {available}=calcFinanceTotals();
+  const hb=document.getElementById('header-balance');
+  hb.textContent=fmt$(available);
+  hb.className='amt'+(available<0?' neg':'');
 })();
 </script>
 </body>
