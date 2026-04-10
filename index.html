@@ -1361,22 +1361,43 @@ async function importFromUrl() {
   finally{btn.textContent='Import';btn.disabled=false;}
 }
 function parseRawRecipeText() {
-  const raw=document.getElementById('rec-smart-paste').value.trim();
-  if(!raw){toast('Paste text first.','warn');return;}
-  const unitRx=/\b(cup|cups|c|tbsp|tsp|teaspoon|tablespoon|oz|ounce|lb|lbs|pound|g|gram|kg|ml|liter|clove|pinch|can|package|slice|piece|bottle|bottles|btl|roll|rolls|box|boxes|pump|pumps|scoop|scoops|drop|drops|spray|sprays|pad|pads|sheet|sheets|wipe|wipes|load|loads)\b/i;
-  const numRx=/^[\d\u00BC-\u00BE\u2150-\u215E]/;
-  const lines=raw.split('\n').map(l=>l.trim()).filter(l=>l.length>0);
-  let items=[],insts=[];
-  lines.forEach(line=>{
-    const ll=line.toLowerCase();
-    if(['ingredients','instructions','method','directions','items needed','supplies'].includes(ll)) return;
-    if((numRx.test(line)||unitRx.test(line))&&line.length<100) items.push(line);
-    else insts.push(line.replace(/^\d+[\.\)]\s*/,''));
+  const raw = document.getElementById('rec-smart-paste').value.trim();
+  if (!raw) { toast('Paste text first.', 'warn'); return; }
+
+  // 1. Expanded dictionaries to catch more formats
+  const unitRx = /\b(cup|cups|c|tbsp|tsp|teaspoon|tablespoon|oz|ounce|lb|lbs|pound|g|gram|kg|ml|liter|clove|pinch|can|package|slice|piece|bottle|bottles|btl|roll|rolls|box|boxes|pump|pumps|scoop|scoops|drop|drops|spray|sprays|pad|pads|sheet|sheets|wipe|wipes|load|loads)\b/i;
+  const numRx = /^[\d\u00BC-\u00BE\u2150-\u215E]/;
+  const bulletRx = /^[\-\*•]\s*/; // Catches dashed or bulleted lists
+
+  const lines = raw.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+  let items = [], insts = [];
+
+  lines.forEach(line => {
+    const ll = line.toLowerCase();
+    // Skip common website headers
+    if (['ingredients','instructions','method','directions','items needed','supplies'].includes(ll)) return;
+
+    // 2. Smarter Sorting Logic
+    const isShort = line.length < 80;
+    const hasUnit = unitRx.test(line);
+    const startsWithNum = numRx.test(line);
+    const startsWithBullet = bulletRx.test(line);
+    const endsWithPunct = /[.!?]$/.test(line);
+
+    // If it's short AND (has a bullet, a number, a unit, or lacks sentence punctuation) -> It is an ingredient
+    if (isShort && (hasUnit || startsWithNum || startsWithBullet || !endsWithPunct)) {
+      items.push(line.replace(bulletRx, '')); // Strip the bullet before moving to Required Items
+    } else {
+      insts.push(line.replace(/^\d+[\.\)]\s*/, '')); // Strip numbered formatting for Instructions
+    }
   });
-  if(items.length>0) document.getElementById('rec-ingredients').value=items.join('\n');
-  if(insts.length>0) document.getElementById('rec-instructions').value=insts.map((s,i)=>`${i+1}. ${s}`).join('\n\n');
-  document.getElementById('rec-smart-paste').value='';
-  toast('Text sorted into items and instructions!','success');
+
+  // 3. Auto-populate the modal fields
+  if (items.length > 0) document.getElementById('rec-ingredients').value = items.join('\n');
+  if (insts.length > 0) document.getElementById('rec-instructions').value = insts.map((s, i) => `${i + 1}. ${s}`).join('\n\n');
+  
+  document.getElementById('rec-smart-paste').value = '';
+  toast('Text sorted! Review Required Items before saving.', 'success');
 }
 function saveRecipe(e) {
   if(e) e.preventDefault();
