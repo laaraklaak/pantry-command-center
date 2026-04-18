@@ -1324,11 +1324,23 @@ function promptWipe(target) {
   document.getElementById('wipe-title').textContent = `Wipe ${target === 'finance' ? 'Finance' : 'Time Tracker'} Data?`;
   openModal('wipe-overlay');
 }
-function closeConfirm() { closeModal('wipe-overlay'); wipeTarget = null; }
 document.getElementById('wipe-btn').addEventListener('click', () => {
-  if (wipeTarget === 'finance') { transactions=[]; persistData(); renderFinanceDashboard(); }
-  else if (wipeTarget === 'time') { tasks=[]; persistData(); renderTasks(); }
-  closeConfirm(); toast(`${wipeTarget} data wiped.`, 'success');
+  // Save the target name before the closeConfirm function resets it
+  const targetName = wipeTarget; 
+  
+  if (targetName === 'finance') { 
+    transactions = []; 
+    persistData(); 
+    renderFinanceDashboard(); 
+  }
+  else if (targetName === 'time') { 
+    tasks = []; 
+    persistData(); 
+    renderTasks(); 
+  }
+  
+  closeConfirm(); 
+  toast(`${targetName} data wiped.`, 'success');
 });
 
 /* ══════════════════════════════════════════════════════════════════
@@ -1385,6 +1397,8 @@ function updateTutorialUI() {
   if (!localStorage.getItem('hqTutV3')) { setTimeout(openTutorial, 800); }
   checkUrgentTasks(); // Check for urgent tasks today
 })();
+ 
 </script>
+   
 </body>
 </html>
